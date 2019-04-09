@@ -1,0 +1,4 @@
+In discussion 8, TA gave a introduction about CUDA and showed us how to rum sample code on HPC.
+No slides used. To allocate a node with GPU, some parameter is added for "srun". I didn't write the parameter down since I though there would be a home work file uploaded later, and there isn't until April 2nd (Week 12).
+I planned to start project after midterm 2, then ask TA what the parameter is.
+The midterm 2 is moved from March 26th to April 4th, announced March 21st.
