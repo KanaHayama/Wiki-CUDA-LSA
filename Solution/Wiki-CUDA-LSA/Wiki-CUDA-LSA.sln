@@ -1,0 +1,61 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28010.2019
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LargeMatrixParallelSVD", "LargeMatrixParallelSVD\LargeMatrixParallelSVD.vcxproj", "{764FFC4C-0B16-4060-AF42-5C22B6AC4F11}"
+	ProjectSection(ProjectDependencies) = postProject
+		{48BF1657-A363-46DA-B237-C511C4696A26} = {48BF1657-A363-46DA-B237-C511C4696A26}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ParallelTDIDF", "ParallelTDIDF\ParallelTDIDF.vcxproj", "{48BF1657-A363-46DA-B237-C511C4696A26}"
+	ProjectSection(ProjectDependencies) = postProject
+		{980127D6-9FDC-43F0-A0BA-2ED9500DA57C} = {980127D6-9FDC-43F0-A0BA-2ED9500DA57C}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WikiExtractAndFormatting", "WikiExtractAndFormatting\WikiExtractAndFormatting.vcxproj", "{B8B126AA-52E6-4483-9328-00E522A2489B}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "StemmingAndLemmatization", "StemmingAndLemmatization\StemmingAndLemmatization.vcxproj", "{980127D6-9FDC-43F0-A0BA-2ED9500DA57C}"
+	ProjectSection(ProjectDependencies) = postProject
+		{B8B126AA-52E6-4483-9328-00E522A2489B} = {B8B126AA-52E6-4483-9328-00E522A2489B}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LatentSemanticAnalysis", "LatentSemanticAnalysis\LatentSemanticAnalysis.vcxproj", "{433C984A-6D6B-4E2A-ADD5-BA87BE67E353}"
+	ProjectSection(ProjectDependencies) = postProject
+		{764FFC4C-0B16-4060-AF42-5C22B6AC4F11} = {764FFC4C-0B16-4060-AF42-5C22B6AC4F11}
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{764FFC4C-0B16-4060-AF42-5C22B6AC4F11}.Debug|x64.ActiveCfg = Debug|x64
+		{764FFC4C-0B16-4060-AF42-5C22B6AC4F11}.Debug|x64.Build.0 = Debug|x64
+		{764FFC4C-0B16-4060-AF42-5C22B6AC4F11}.Release|x64.ActiveCfg = Release|x64
+		{764FFC4C-0B16-4060-AF42-5C22B6AC4F11}.Release|x64.Build.0 = Release|x64
+		{48BF1657-A363-46DA-B237-C511C4696A26}.Debug|x64.ActiveCfg = Debug|x64
+		{48BF1657-A363-46DA-B237-C511C4696A26}.Debug|x64.Build.0 = Debug|x64
+		{48BF1657-A363-46DA-B237-C511C4696A26}.Release|x64.ActiveCfg = Release|x64
+		{48BF1657-A363-46DA-B237-C511C4696A26}.Release|x64.Build.0 = Release|x64
+		{B8B126AA-52E6-4483-9328-00E522A2489B}.Debug|x64.ActiveCfg = Debug|x64
+		{B8B126AA-52E6-4483-9328-00E522A2489B}.Debug|x64.Build.0 = Debug|x64
+		{B8B126AA-52E6-4483-9328-00E522A2489B}.Release|x64.ActiveCfg = Release|x64
+		{B8B126AA-52E6-4483-9328-00E522A2489B}.Release|x64.Build.0 = Release|x64
+		{980127D6-9FDC-43F0-A0BA-2ED9500DA57C}.Debug|x64.ActiveCfg = Debug|x64
+		{980127D6-9FDC-43F0-A0BA-2ED9500DA57C}.Debug|x64.Build.0 = Debug|x64
+		{980127D6-9FDC-43F0-A0BA-2ED9500DA57C}.Release|x64.ActiveCfg = Release|x64
+		{980127D6-9FDC-43F0-A0BA-2ED9500DA57C}.Release|x64.Build.0 = Release|x64
+		{433C984A-6D6B-4E2A-ADD5-BA87BE67E353}.Debug|x64.ActiveCfg = Debug|x64
+		{433C984A-6D6B-4E2A-ADD5-BA87BE67E353}.Debug|x64.Build.0 = Debug|x64
+		{433C984A-6D6B-4E2A-ADD5-BA87BE67E353}.Release|x64.ActiveCfg = Release|x64
+		{433C984A-6D6B-4E2A-ADD5-BA87BE67E353}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {710C434E-D3A6-4791-8623-E0C57A7752DE}
+	EndGlobalSection
+EndGlobal
