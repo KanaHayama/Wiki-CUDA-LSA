@@ -1,121 +1,66 @@
-
-#include "cuda_runtime.h"
-#include "device_launch_parameters.h"
+/*
+ * How to compile (assume cuda is installed at /usr/local/cuda/)
+ *   nvcc -c -I/usr/local/cuda/include svd_example.cpp
+ *   g++ -o a.out svd_example.o -L/usr/local/cuda/lib64 -lcudart -lcublas -lcusolver
+ *
+ */
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+#include <cuda_runtime.h>
+#include <cublas_v2.h>
 
-cudaError_t addWithCuda(int *c, const int *a, const int *b, unsigned int size);
+#include "svd.cuh"
 
-__global__ void addKernel(int *c, const int *a, const int *b)
-{
-    int i = threadIdx.x;
-    c[i] = a[i] + b[i];
+void printMatrix(int m, int n, const double*A, int lda, const char* name) {
+	for (int row = 0; row < m; row++) {
+		for (int col = 0; col < n; col++) {
+			double Areg = A[row + col * lda];
+			printf("%s(%d,%d) = %f\n", name, row + 1, col + 1, Areg);
+		}
+	}
 }
 
-int main()
-{
-    const int arraySize = 5;
-    const int a[arraySize] = { 1, 2, 3, 4, 5 };
-    const int b[arraySize] = { 10, 20, 30, 40, 50 };
-    int c[arraySize] = { 0 };
+int main(int argc, char*argv[]) {
+	const int m = 3;
+	const int n = 2;
+	const int lda = m;
+	/*       | 1 2  |
+	 *   A = | 4 5  |
+	 *       | 2 1  |
+	 */
+	double A[lda*n] = { 1.0, 4.0, 2.0, 2.0, 5.0, 1.0 };
+	double result_A[lda*n];
+	double U[lda*m]; // m-by-m unitary matrix 
+	double VT[lda*n];  // n-by-n unitary matrix
+	double S[n]; // singular value
 
-    // Add vectors in parallel.
-    cudaError_t cudaStatus = addWithCuda(c, a, b, arraySize);
-    if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "addWithCuda failed!");
-        return 1;
-    }
+	printf("A = (matlab base-1)\n");
+	printMatrix(m, n, A, lda, "A");
+	printf("=====\n");
 
-    printf("{1,2,3,4,5} + {10,20,30,40,50} = {%d,%d,%d,%d,%d}\n",
-        c[0], c[1], c[2], c[3], c[4]);
+	svd(m, n, A, U, S, VT);
+	
+	printf("=====\n");
 
-    // cudaDeviceReset must be called before exiting in order for profiling and
-    // tracing tools such as Nsight and Visual Profiler to show complete traces.
-    cudaStatus = cudaDeviceReset();
-    if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "cudaDeviceReset failed!");
-        return 1;
-    }
+	printf("S = (matlab base-1)\n");
+	printMatrix(n, 1, S, lda, "S");
+	printf("=====\n");
 
-    return 0;
-}
+	printf("U = (matlab base-1)\n");
+	printMatrix(m, m, U, lda, "U");
+	printf("=====\n");
 
-// Helper function for using CUDA to add vectors in parallel.
-cudaError_t addWithCuda(int *c, const int *a, const int *b, unsigned int size)
-{
-    int *dev_a = 0;
-    int *dev_b = 0;
-    int *dev_c = 0;
-    cudaError_t cudaStatus;
+	printf("VT = (matlab base-1)\n");
+	printMatrix(n, n, VT, lda, "VT");
+	printf("=====\n");
 
-    // Choose which GPU to run on, change this on a multi-GPU system.
-    cudaStatus = cudaSetDevice(0);
-    if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "cudaSetDevice failed!  Do you have a CUDA-capable GPU installed?");
-        goto Error;
-    }
+	principle_k_singulars(n, 1, S);
 
-    // Allocate GPU buffers for three vectors (two input, one output)    .
-    cudaStatus = cudaMalloc((void**)&dev_c, size * sizeof(int));
-    if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "cudaMalloc failed!");
-        goto Error;
-    }
+	svd_r(m, n, U, S, VT, result_A);
+	printMatrix(m, n, result_A, lda, "rsult A");
 
-    cudaStatus = cudaMalloc((void**)&dev_a, size * sizeof(int));
-    if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "cudaMalloc failed!");
-        goto Error;
-    }
-
-    cudaStatus = cudaMalloc((void**)&dev_b, size * sizeof(int));
-    if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "cudaMalloc failed!");
-        goto Error;
-    }
-
-    // Copy input vectors from host memory to GPU buffers.
-    cudaStatus = cudaMemcpy(dev_a, a, size * sizeof(int), cudaMemcpyHostToDevice);
-    if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "cudaMemcpy failed!");
-        goto Error;
-    }
-
-    cudaStatus = cudaMemcpy(dev_b, b, size * sizeof(int), cudaMemcpyHostToDevice);
-    if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "cudaMemcpy failed!");
-        goto Error;
-    }
-
-    // Launch a kernel on the GPU with one thread for each element.
-    addKernel<<<1, size>>>(dev_c, dev_a, dev_b);
-
-    // Check for any errors launching the kernel
-    cudaStatus = cudaGetLastError();
-    if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "addKernel launch failed: %s\n", cudaGetErrorString(cudaStatus));
-        goto Error;
-    }
-    
-    // cudaDeviceSynchronize waits for the kernel to finish, and returns
-    // any errors encountered during the launch.
-    cudaStatus = cudaDeviceSynchronize();
-    if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "cudaDeviceSynchronize returned error code %d after launching addKernel!\n", cudaStatus);
-        goto Error;
-    }
-
-    // Copy output vector from GPU buffer to host memory.
-    cudaStatus = cudaMemcpy(c, dev_c, size * sizeof(int), cudaMemcpyDeviceToHost);
-    if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "cudaMemcpy failed!");
-        goto Error;
-    }
-
-Error:
-    cudaFree(dev_c);
-    cudaFree(dev_a);
-    cudaFree(dev_b);
-    
-    return cudaStatus;
+	return 0;
 }
