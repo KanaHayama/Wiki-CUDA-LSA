@@ -4,10 +4,8 @@
 
 void svd(int rows, int cols, double * matrix_A, double * matrix_U, double * array_S, double * matrix_VT);
 
-void principle_k_singulars(int cols, int k, double * array_S);
-
 void svd_r(int rows, int cols, double * matrix_U, double * array_S, double * matrix_VT, double * matrix_A);
 
-//TODO: use k to speed up svd, rather than apply k after svd
+void approximate_svd(int rows, int cols, int k, double * matrix_A, double * matrix_U, double * array_S, double * matrix_VT);
 
 #endif // _INC_SVD
