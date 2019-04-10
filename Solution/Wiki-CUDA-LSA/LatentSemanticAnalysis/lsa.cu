@@ -16,7 +16,7 @@ std::vector<std::vector<std::tuple<int, float>>> topTermsInTopConcepts(int rows,
 		for (int j = 0; j < cols; j++) {
 			termWeights.push_back(std::make_tuple(j, matrix_VT[i * cols + j]));//<termIdx, termWeight>
 		}
-		sort(termWeights.begin(), termWeights.end(), [](auto a, auto b) {return std::get<1>(a) > std::get<1>(b); });//weight desc
+		sort(termWeights.begin(), termWeights.end(), [](std::tuple<int, float> a, std::tuple<int, float> b) {return std::get<1>(a) > std::get<1>(b); });//weight desc
 		auto conceptTopTerms = std::vector<std::tuple<int, float>>();
 		for (int j = 0; j < numTerms; j++) {
 			conceptTopTerms.push_back(termWeights[j]);
@@ -37,7 +37,7 @@ std::vector<std::vector<std::tuple<int, float>>> topDocsInTopConcepts(int rows, 
 		for (int i = 0; i < rows; i++) {
 			docWeights.push_back(std::make_tuple(i, matrix_U[i * cols + j]));
 		}
-		sort(docWeights.begin(), docWeights.end(), [](auto a, auto b) {return std::get<1>(a) > std::get<1>(b); });//weight desc
+		sort(docWeights.begin(), docWeights.end(), [](std::tuple<int, float> a, std::tuple<int, float> b) {return std::get<1>(a) > std::get<1>(b); });//weight desc
 		auto conceptTopDocs = std::vector<std::tuple<int, float>>();
 		for (int i = 0; i < numDocs; i++) {
 			conceptTopDocs.push_back(docWeights[i]);
@@ -72,7 +72,7 @@ std::vector<std::tuple<int, float>> topTermsForTerm(int rows, int cols, float * 
 	for (int i = 0; i < rows; i++) {
 		termScores.push_back(std::make_tuple(i, resultVec[i]));
 	}
-	sort(termScores.begin(), termScores.end(), [](auto a, auto b) {return std::get<1>(a) > std::get<1>(b); });//weight desc
+	sort(termScores.begin(), termScores.end(), [](std::tuple<int, float> a, std::tuple<int, float> b) {return std::get<1>(a) > std::get<1>(b); });//weight desc
 	delete[] resultVec;
 	delete[] rowVec;
 	return termScores;
