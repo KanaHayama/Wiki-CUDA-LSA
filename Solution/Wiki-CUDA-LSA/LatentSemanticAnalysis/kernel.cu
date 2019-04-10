@@ -8,7 +8,7 @@
 const auto test_TD_docs = 12;
 const auto test_TD_terms = 9;
 
-static double test_doc_term_freq[test_TD_docs * test_TD_terms] = {
+static float test_doc_term_freq[test_TD_docs * test_TD_terms] = {
 	1, 0, 0, 1, 0, 0, 0, 0, 0,
 	1, 0, 1, 0, 0, 0, 0, 0, 0,
 	1, 1, 0, 0, 0, 0, 0, 0, 0,
@@ -29,25 +29,25 @@ const auto numConcept = 2;
 const auto numTerms = 2;
 const auto numDocs = 2;
 
-void printColMajorMatrix(int m, int n, const double*A, int lda, const char* name) {
+void printColMajorMatrix(int m, int n, const float*A, int lda, const char* name) {
 	for (int row = 0; row < m; row++) {
 		for (int col = 0; col < n; col++) {
-			double Areg = A[col * m + row];
+			float Areg = A[col * m + row];
 			printf("%s(%d,%d) = %f\n", name, row, col, Areg);
 		}
 	}
 }
 
-void printRowMajorMatrix(int m, int n, const double*A, const char* name) {
+void printRowMajorMatrix(int m, int n, const float*A, const char* name) {
 	for (int row = 0; row < m; row++) {
 		for (int col = 0; col < n; col++) {
-			double Areg = A[row * n + col];
+			float Areg = A[row * n + col];
 			printf("%s(%d,%d) = %f\n", name, row, col, Areg);
 		}
 	}
 }
 
-void printConcepts(const int numConcept, const int numTerms, const int numDocs, const std::vector<std::vector<std::tuple<int, double>>> topTerms, const std::vector<std::vector<std::tuple<int, double>>> topDocs) {
+void printConcepts(const int numConcept, const int numTerms, const int numDocs, const std::vector<std::vector<std::tuple<int, float>>> topTerms, const std::vector<std::vector<std::tuple<int, float>>> topDocs) {
 	for (int c = 0; c < numConcept; c++) {
 		std::cout << "Concept " << c << ":" << std::endl;
 		std::cout << "\t" << "Top Term Idx: ";
@@ -63,7 +63,7 @@ void printConcepts(const int numConcept, const int numTerms, const int numDocs, 
 	}
 }
 
-void printTermTerm(const int lookUpIdx, const std::vector<std::tuple<int, double>> termTerm) {
+void printTermTerm(const int lookUpIdx, const std::vector<std::tuple<int, float>> termTerm) {
 	std::cout << "Term correlation to term index " << lookUpIdx << " ranking:" << std::endl;
 	std::cout << "\t";
 	for(auto & t : termTerm) {
@@ -77,12 +77,12 @@ int main(){
 	const int n = test_TD_terms;
 	const int k = test_k;
 	const int lda = m;
-	//TD/IDF
+	//TF/IDF
 	tfidf(m, n, test_doc_term_freq);
 	//svd
-	double U[lda * k];
-	double S[k];
-	double VT[k * n];
+	float U[lda * k];
+	float S[k];
+	float VT[k * n];
 	printf("A = \n");
 	printColMajorMatrix(m, n, test_doc_term_freq, lda, "A");
 	printf("=====\n");
@@ -97,8 +97,8 @@ int main(){
 	printRowMajorMatrix(k, n, VT, "VT");
 	printf("=====\n");
 	printf("V = \n");
-	double V[n * k];
-	memcpy(V, VT, sizeof(double) * k * n);
+	float V[n * k];
+	memcpy(V, VT, sizeof(float) * k * n);
 	transpose(k, n, V);
 	printRowMajorMatrix(n, k, V, "V");
 	printf("=====\n");
@@ -109,29 +109,29 @@ int main(){
 	printf("=====\n");
 	//corrolated
 	printf("V*S = \n");
-	double VS[n * k];
-	memcpy(VS, V, sizeof(double) * k * n);
+	float VS[n * k];
+	memcpy(VS, V, sizeof(float) * k * n);
 	multiplyByDiagonalMatrix(n, k, VS, S);
 	printRowMajorMatrix(n, k, VS, "VS");
 	printf("=====\n");
 
 	printf("norm(V*S) = \n");
-	double normVS[n * k];
-	memcpy(normVS, VS, sizeof(double) * k * n);
+	float normVS[n * k];
+	memcpy(normVS, VS, sizeof(float) * k * n);
 	rowsNormalized(n, k, normVS);
 	printRowMajorMatrix(n, k, normVS, "normVS");
 	printf("=====\n");
 
 	printf("U*S = \n");
-	double US[m * k];
-	memcpy(US, U, sizeof(double) * k * m);
+	float US[m * k];
+	memcpy(US, U, sizeof(float) * k * m);
 	multiplyByDiagonalMatrix(m, k, US, S);
 	printRowMajorMatrix(m, k, US, "US");
 	printf("=====\n");
 
 	printf("norm(U*S) = \n");
-	double normUS[m * k];
-	memcpy(normUS, US, sizeof(double) * k * m);
+	float normUS[m * k];
+	memcpy(normUS, US, sizeof(float) * k * m);
 	rowsNormalized(m, k, normUS);
 	printRowMajorMatrix(m, k, normUS, "normUS");
 	printf("=====\n");

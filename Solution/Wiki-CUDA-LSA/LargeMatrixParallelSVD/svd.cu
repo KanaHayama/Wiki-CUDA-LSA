@@ -4,46 +4,46 @@
 #include <cublas_v2.h>
 #include <cusolverDn.h>
 
-void transpose_device(int rows, int cols, double * d_Matrix) {
+void transpose_device(int rows, int cols, float * d_Matrix) {
 	cudaError_t cudaStat = cudaSuccess;
-	double * d_Result = NULL;
-	cudaStat = cudaMalloc((void**)&d_Result, sizeof(double) * rows * cols);
+	float * d_Result = NULL;
+	cudaStat = cudaMalloc((void**)&d_Result, sizeof(float) * rows * cols);
 	assert(cudaSuccess == cudaStat);
-	const double alpha = 1;
-	const double beta = 0;
+	const float alpha = 1;
+	const float beta = 0;
 	cublasHandle_t handle;
 	cublasCreate(&handle);
 	cublasStatus_t cublas_status = CUBLAS_STATUS_SUCCESS;
-	cublasDgeam(handle, CUBLAS_OP_T, CUBLAS_OP_N, rows, cols, &alpha, d_Matrix, cols, &beta, d_Matrix, rows, d_Result, rows);//cublasSgeam: float version
+	cublasSgeam(handle, CUBLAS_OP_T, CUBLAS_OP_N, rows, cols, &alpha, d_Matrix, cols, &beta, d_Matrix, rows, d_Result, rows);
 	assert(CUBLAS_STATUS_SUCCESS == cublas_status);
-	cudaStat = cudaMemcpy(d_Matrix, d_Result, sizeof(double) * rows * cols, cudaMemcpyDeviceToDevice);
+	cudaStat = cudaMemcpy(d_Matrix, d_Result, sizeof(float) * rows * cols, cudaMemcpyDeviceToDevice);
 	assert(cudaSuccess == cudaStat);
 	if (d_Result) cudaFree(d_Result);
 	cublasDestroy(handle);
 }
 
-void transpose(int rows, int cols, double * matrix) {
+void transpose(int rows, int cols, float * matrix) {
 	cudaError_t cudaStat = cudaSuccess;
-	double * d_Matrix = NULL;
-	cudaStat = cudaMalloc((void**)&d_Matrix, sizeof(double) * rows * cols);
+	float * d_Matrix = NULL;
+	cudaStat = cudaMalloc((void**)&d_Matrix, sizeof(float) * rows * cols);
 	assert(cudaSuccess == cudaStat);
-	cudaStat = cudaMemcpy(d_Matrix, matrix, sizeof(double) * rows * cols, cudaMemcpyHostToDevice);
+	cudaStat = cudaMemcpy(d_Matrix, matrix, sizeof(float) * rows * cols, cudaMemcpyHostToDevice);
 	assert(cudaSuccess == cudaStat);
 	transpose_device(rows, cols, d_Matrix);
-	cudaStat = cudaMemcpy(matrix, d_Matrix, sizeof(double) * rows * cols, cudaMemcpyDeviceToHost);
+	cudaStat = cudaMemcpy(matrix, d_Matrix, sizeof(float) * rows * cols, cudaMemcpyDeviceToHost);
 	assert(cudaSuccess == cudaStat);
 	if (d_Matrix) cudaFree(d_Matrix);
 }
 
-inline void row_major_2_col_major_device(int rows, int cols, double * matrix) {
+inline void row_major_2_col_major_device(int rows, int cols, float * matrix) {
 	transpose_device(rows, cols, matrix);
 }
 
-inline void col_major_2_row_major_device(int rows, int cols, double * matrix) {
+inline void col_major_2_row_major_device(int rows, int cols, float * matrix) {
 	transpose_device(cols, rows, matrix);
 }
 
-void svd(int rows, int cols, double * matrix_A, double * matrix_U, double * array_S, double * matrix_VT) {
+void svd(int rows, int cols, float * matrix_A, float * matrix_U, float * array_S, float * matrix_VT) {
 	assert(rows >= cols);
 	// step 1: create cusolverDn handle
 	cusolverDnHandle_t cusolverH = NULL;
@@ -54,23 +54,23 @@ void svd(int rows, int cols, double * matrix_A, double * matrix_U, double * arra
 	// step 2: copy A and B to device
 	const int lda = rows;
 	cudaError_t cudaStat = cudaSuccess;
-	double * d_A = NULL;
-	cudaStat = cudaMalloc((void**)&d_A, sizeof(double) * lda * cols);
+	float * d_A = NULL;
+	cudaStat = cudaMalloc((void**)&d_A, sizeof(float) * lda * cols);
 	assert(cudaSuccess == cudaStat);
-	double *d_U = NULL;
-	cudaStat = cudaMalloc((void**)&d_U, sizeof(double) * lda * rows);
+	float *d_U = NULL;
+	cudaStat = cudaMalloc((void**)&d_U, sizeof(float) * lda * rows);
 	assert(cudaSuccess == cudaStat);
-	double *d_S = NULL;
-	cudaStat = cudaMalloc((void**)&d_S, sizeof(double) * cols);
+	float *d_S = NULL;
+	cudaStat = cudaMalloc((void**)&d_S, sizeof(float) * cols);
 	assert(cudaSuccess == cudaStat);
-	double *d_VT = NULL;
-	cudaStat = cudaMalloc((void**)&d_VT, sizeof(double) * lda * cols);
+	float *d_VT = NULL;
+	cudaStat = cudaMalloc((void**)&d_VT, sizeof(float) * lda * cols);
 	assert(cudaSuccess == cudaStat);
 	int * devInfo = NULL;
 	cudaStat = cudaMalloc((void**)&devInfo, sizeof(int));
 	assert(cudaSuccess == cudaStat);
 
-	cudaStat = cudaMemcpy(d_A, matrix_A, sizeof(double) * lda * cols, cudaMemcpyHostToDevice);
+	cudaStat = cudaMemcpy(d_A, matrix_A, sizeof(float) * lda * cols, cudaMemcpyHostToDevice);
 	assert(cudaSuccess == cudaStat);
 
 	row_major_2_col_major_device(lda, cols, d_A);
@@ -84,15 +84,15 @@ void svd(int rows, int cols, double * matrix_A, double * matrix_U, double * arra
 		&lwork);
 	assert(cusolver_status == CUSOLVER_STATUS_SUCCESS);
 
-	double *d_work = NULL;
-	cudaStat = cudaMalloc((void**)&d_work, sizeof(double) * lwork);
+	float *d_work = NULL;
+	cudaStat = cudaMalloc((void**)&d_work, sizeof(float) * lwork);
 	assert(cudaSuccess == cudaStat);
 
 	// step 4: compute SVD
 	signed char jobu = 'A'; // all m columns of U
 	signed char jobvt = 'A'; // all n columns of VT
-	double *d_rwork = NULL;
-	cusolver_status = cusolverDnDgesvd(
+	float *d_rwork = NULL;
+	cusolver_status = cusolverDnSgesvd(
 		cusolverH,
 		jobu,
 		jobvt,
@@ -116,16 +116,16 @@ void svd(int rows, int cols, double * matrix_A, double * matrix_U, double * arra
 	// step 5: copy back
 	if (matrix_U) {
 		col_major_2_row_major_device(lda, rows, d_U);
-		cudaStat = cudaMemcpy(matrix_U, d_U, sizeof(double) * lda * rows, cudaMemcpyDeviceToHost);
+		cudaStat = cudaMemcpy(matrix_U, d_U, sizeof(float) * lda * rows, cudaMemcpyDeviceToHost);
 		assert(cudaSuccess == cudaStat);
 	}
 	if (array_S) {
-		cudaStat = cudaMemcpy(array_S, d_S, sizeof(double) * cols, cudaMemcpyDeviceToHost);
+		cudaStat = cudaMemcpy(array_S, d_S, sizeof(float) * cols, cudaMemcpyDeviceToHost);
 		assert(cudaSuccess == cudaStat);
 	}
 	if (matrix_VT) {
 		col_major_2_row_major_device(lda, cols, d_VT);
-		cudaStat = cudaMemcpy(matrix_VT, d_VT, sizeof(double) * lda * cols, cudaMemcpyDeviceToHost);
+		cudaStat = cudaMemcpy(matrix_VT, d_VT, sizeof(float) * lda * cols, cudaMemcpyDeviceToHost);
 		assert(cudaSuccess == cudaStat);
 	}
 	int info_gpu = 0;
@@ -146,34 +146,34 @@ void svd(int rows, int cols, double * matrix_A, double * matrix_U, double * arra
 	cudaDeviceReset();
 }
 
-void svd_r(int rows, int cols, double * matrix_U, double * array_S, double * matrix_VT, double * matrix_A) {
+void svd_r(int rows, int cols, float * matrix_U, float * array_S, float * matrix_VT, float * matrix_A) {
 	// copy
 	const int lda = rows;
 	cudaError_t cudaStat = cudaSuccess;
-	double *d_U = NULL;
-	cudaStat = cudaMalloc((void**)&d_U, sizeof(double) * lda * rows);
+	float *d_U = NULL;
+	cudaStat = cudaMalloc((void**)&d_U, sizeof(float) * lda * rows);
 	assert(cudaSuccess == cudaStat);
-	double *d_S = NULL;
-	cudaStat = cudaMalloc((void**)&d_S, sizeof(double) * cols);
+	float *d_S = NULL;
+	cudaStat = cudaMalloc((void**)&d_S, sizeof(float) * cols);
 	assert(cudaSuccess == cudaStat);
-	double *d_VT = NULL;
-	cudaStat = cudaMalloc((void**)&d_VT, sizeof(double) * lda * cols);
+	float *d_VT = NULL;
+	cudaStat = cudaMalloc((void**)&d_VT, sizeof(float) * lda * cols);
 	assert(cudaSuccess == cudaStat);
-	double * d_W = NULL;  // W = S*VT
-	cudaStat = cudaMalloc((void**)&d_W, sizeof(double) * lda * cols);
+	float * d_W = NULL;  // W = S*VT
+	cudaStat = cudaMalloc((void**)&d_W, sizeof(float) * lda * cols);
 	assert(cudaSuccess == cudaStat);
-	double * d_A = NULL;
-	cudaStat = cudaMalloc((void**)&d_A, sizeof(double) * lda * cols);
+	float * d_A = NULL;
+	cudaStat = cudaMalloc((void**)&d_A, sizeof(float) * lda * cols);
 	assert(cudaSuccess == cudaStat);
 	int * devInfo = NULL;
 	cudaStat = cudaMalloc((void**)&devInfo, sizeof(int));
 	assert(cudaSuccess == cudaStat);
 
-	cudaStat = cudaMemcpy(d_U, matrix_U, sizeof(double) * lda * rows, cudaMemcpyHostToDevice);
+	cudaStat = cudaMemcpy(d_U, matrix_U, sizeof(float) * lda * rows, cudaMemcpyHostToDevice);
 	assert(cudaSuccess == cudaStat);
-	cudaStat = cudaMemcpy(d_S, array_S, sizeof(double) * cols, cudaMemcpyHostToDevice);
+	cudaStat = cudaMemcpy(d_S, array_S, sizeof(float) * cols, cudaMemcpyHostToDevice);
 	assert(cudaSuccess == cudaStat);
-	cudaStat = cudaMemcpy(d_VT, matrix_VT, sizeof(double) * lda * cols, cudaMemcpyHostToDevice);
+	cudaStat = cudaMemcpy(d_VT, matrix_VT, sizeof(float) * lda * cols, cudaMemcpyHostToDevice);
 	assert(cudaSuccess == cudaStat);
 
 	// create cublas handle
@@ -183,7 +183,7 @@ void svd_r(int rows, int cols, double * matrix_U, double * array_S, double * mat
 	assert(CUBLAS_STATUS_SUCCESS == cublas_status);
 
 	// W = S*VT
-	cublas_status = cublasDdgmm(
+	cublas_status = cublasSdgmm(
 		cublasH,
 		CUBLAS_SIDE_LEFT,
 		cols,
@@ -198,9 +198,9 @@ void svd_r(int rows, int cols, double * matrix_U, double * array_S, double * mat
 
 	// A := U*W
 	assert(cudaSuccess == cudaStat);
-	const double h_one = 1;
-	const double h_zero = 0;
-	cublas_status = cublasDgemm_v2(
+	const float h_one = 1;
+	const float h_zero = 0;
+	cublas_status = cublasSgemm_v2(
 		cublasH,
 		CUBLAS_OP_N, // U
 		CUBLAS_OP_N, // W
@@ -219,7 +219,7 @@ void svd_r(int rows, int cols, double * matrix_U, double * array_S, double * mat
 
 	// copy
 	if (matrix_A) {
-		cudaStat = cudaMemcpy(matrix_A, d_A, sizeof(double) * lda * cols, cudaMemcpyDeviceToHost);
+		cudaStat = cudaMemcpy(matrix_A, d_A, sizeof(float) * lda * cols, cudaMemcpyDeviceToHost);
 		assert(cudaSuccess == cudaStat);
 	}
 
@@ -235,7 +235,7 @@ void svd_r(int rows, int cols, double * matrix_U, double * array_S, double * mat
 }
 
 //TODO: use k to speed up svd, rather than apply after svd
-void approximate_svd(int rows, int cols, int k, double * matrix_A, double * matrix_U, double * array_S, double * matrix_VT) {
+void approximate_svd(int rows, int cols, int k, float * matrix_A, float * matrix_U, float * array_S, float * matrix_VT) {
 	assert(rows >= cols);
 	assert(k <= rows && k <= cols);
 	// step 1: create cusolverDn handle
@@ -247,23 +247,23 @@ void approximate_svd(int rows, int cols, int k, double * matrix_A, double * matr
 	// step 2: copy A and B to device
 	const int lda = rows;
 	cudaError_t cudaStat = cudaSuccess;
-	double * d_A = NULL;
-	cudaStat = cudaMalloc((void**)&d_A, sizeof(double) * lda * cols);
+	float * d_A = NULL;
+	cudaStat = cudaMalloc((void**)&d_A, sizeof(float) * lda * cols);
 	assert(cudaSuccess == cudaStat);
-	double *d_U = NULL;
-	cudaStat = cudaMalloc((void**)&d_U, sizeof(double) * lda * rows);
+	float *d_U = NULL;
+	cudaStat = cudaMalloc((void**)&d_U, sizeof(float) * lda * rows);
 	assert(cudaSuccess == cudaStat);
-	double *d_S = NULL;
-	cudaStat = cudaMalloc((void**)&d_S, sizeof(double) * cols);
+	float *d_S = NULL;
+	cudaStat = cudaMalloc((void**)&d_S, sizeof(float) * cols);
 	assert(cudaSuccess == cudaStat);
-	double *d_VT = NULL;
-	cudaStat = cudaMalloc((void**)&d_VT, sizeof(double) * lda * cols);
+	float *d_VT = NULL;
+	cudaStat = cudaMalloc((void**)&d_VT, sizeof(float) * lda * cols);
 	assert(cudaSuccess == cudaStat);
 	int * devInfo = NULL;
 	cudaStat = cudaMalloc((void**)&devInfo, sizeof(int));
 	assert(cudaSuccess == cudaStat);
 
-	cudaStat = cudaMemcpy(d_A, matrix_A, sizeof(double) * lda * cols, cudaMemcpyHostToDevice);
+	cudaStat = cudaMemcpy(d_A, matrix_A, sizeof(float) * lda * cols, cudaMemcpyHostToDevice);
 	assert(cudaSuccess == cudaStat);
 
 	row_major_2_col_major_device(lda, cols, d_A);
@@ -277,15 +277,15 @@ void approximate_svd(int rows, int cols, int k, double * matrix_A, double * matr
 		&lwork);
 	assert(cusolver_status == CUSOLVER_STATUS_SUCCESS);
 
-	double *d_work = NULL;
-	cudaStat = cudaMalloc((void**)&d_work, sizeof(double) * lwork);
+	float *d_work = NULL;
+	cudaStat = cudaMalloc((void**)&d_work, sizeof(float) * lwork);
 	assert(cudaSuccess == cudaStat);
 
 	// step 4: compute SVD
 	signed char jobu = 'A'; // all m columns of U
 	signed char jobvt = 'A'; // all n columns of VT
-	double *d_rwork = NULL;
-	cusolver_status = cusolverDnDgesvd(
+	float *d_rwork = NULL;
+	cusolver_status = cusolverDnSgesvd(
 		cusolverH,
 		jobu,
 		jobvt,
@@ -309,23 +309,23 @@ void approximate_svd(int rows, int cols, int k, double * matrix_A, double * matr
 	// step 5: copy back
 	if (matrix_U) {
 		col_major_2_row_major_device(lda, k, d_U);
-		cudaStat = cudaMemcpy(matrix_U, d_U, sizeof(double) * lda * k, cudaMemcpyDeviceToHost);
+		cudaStat = cudaMemcpy(matrix_U, d_U, sizeof(float) * lda * k, cudaMemcpyDeviceToHost);
 		assert(cudaSuccess == cudaStat);
 	}
 	if (array_S) {
-		cudaStat = cudaMemcpy(array_S, d_S, sizeof(double) * k, cudaMemcpyDeviceToHost);
+		cudaStat = cudaMemcpy(array_S, d_S, sizeof(float) * k, cudaMemcpyDeviceToHost);
 		assert(cudaSuccess == cudaStat);
 	}
 	if (matrix_VT) {
-		double * d_Temp = NULL;
-		cudaStat = cudaMalloc((void**)&d_Temp, sizeof(double) * k * cols);
+		float * d_Temp = NULL;
+		cudaStat = cudaMalloc((void**)&d_Temp, sizeof(float) * k * cols);
 		assert(cudaSuccess == cudaStat);
 		for (int i = 0; i < cols; i++) {
-			cudaStat = cudaMemcpy(d_Temp + i * k, d_VT + i * lda, sizeof(double) * k, cudaMemcpyDeviceToDevice);
+			cudaStat = cudaMemcpy(d_Temp + i * k, d_VT + i * lda, sizeof(float) * k, cudaMemcpyDeviceToDevice);
 			assert(cudaSuccess == cudaStat);
 		}
 		col_major_2_row_major_device(k, cols, d_Temp);
-		cudaStat = cudaMemcpy(matrix_VT, d_Temp, sizeof(double) * k * cols, cudaMemcpyDeviceToHost);
+		cudaStat = cudaMemcpy(matrix_VT, d_Temp, sizeof(float) * k * cols, cudaMemcpyDeviceToHost);
 		assert(cudaSuccess == cudaStat);
 		if (d_Temp) cudaFree(d_Temp);
 	}
@@ -347,22 +347,22 @@ void approximate_svd(int rows, int cols, int k, double * matrix_A, double * matr
 	cudaDeviceReset();
 }
 
-void multiplyByDiagonalMatrix(int rows, int cols, double * matrix, double * array) {
+void multiplyByDiagonalMatrix(int rows, int cols, float * matrix, float * array) {
 	// copy
 	cudaError_t cudaStat = cudaSuccess;
-	double *d_Matrix = NULL;
-	cudaStat = cudaMalloc((void**)&d_Matrix, sizeof(double) * rows * cols);
+	float *d_Matrix = NULL;
+	cudaStat = cudaMalloc((void**)&d_Matrix, sizeof(float) * rows * cols);
 	assert(cudaSuccess == cudaStat);
-	double *d_Array = NULL;
-	cudaStat = cudaMalloc((void**)&d_Array, sizeof(double) * cols);
+	float *d_Array = NULL;
+	cudaStat = cudaMalloc((void**)&d_Array, sizeof(float) * cols);
 	assert(cudaSuccess == cudaStat);
-	double * d_Result = NULL;  // W = S*VT
-	cudaStat = cudaMalloc((void**)&d_Result, sizeof(double) * rows * cols);
+	float * d_Result = NULL;  // W = S*VT
+	cudaStat = cudaMalloc((void**)&d_Result, sizeof(float) * rows * cols);
 	assert(cudaSuccess == cudaStat);
 
-	cudaStat = cudaMemcpy(d_Matrix, matrix, sizeof(double) * rows * cols, cudaMemcpyHostToDevice);
+	cudaStat = cudaMemcpy(d_Matrix, matrix, sizeof(float) * rows * cols, cudaMemcpyHostToDevice);
 	assert(cudaSuccess == cudaStat);
-	cudaStat = cudaMemcpy(d_Array, array, sizeof(double) * cols, cudaMemcpyHostToDevice);
+	cudaStat = cudaMemcpy(d_Array, array, sizeof(float) * cols, cudaMemcpyHostToDevice);
 	assert(cudaSuccess == cudaStat);
 
 	row_major_2_col_major_device(rows, cols, d_Matrix);
@@ -374,7 +374,7 @@ void multiplyByDiagonalMatrix(int rows, int cols, double * matrix, double * arra
 	assert(CUBLAS_STATUS_SUCCESS == cublas_status);
 
 	// R = M*S
-	cublas_status = cublasDdgmm(
+	cublas_status = cublasSdgmm(
 		cublasH,
 		CUBLAS_SIDE_RIGHT,
 		rows,
@@ -390,7 +390,7 @@ void multiplyByDiagonalMatrix(int rows, int cols, double * matrix, double * arra
 	col_major_2_row_major_device(rows, cols, d_Result);
 
 	// copy
-	cudaStat = cudaMemcpy(matrix, d_Result, sizeof(double) * rows * cols, cudaMemcpyDeviceToHost);
+	cudaStat = cudaMemcpy(matrix, d_Result, sizeof(float) * rows * cols, cudaMemcpyDeviceToHost);
 	assert(cudaSuccess == cudaStat);
 
 	// free
@@ -401,22 +401,22 @@ void multiplyByDiagonalMatrix(int rows, int cols, double * matrix, double * arra
 	cudaDeviceReset();
 }
 
-void multiply(int rows, int k, int cols, double * matrixA, double * matrixB, double * result) {
+void multiply(int rows, int k, int cols, float * matrixA, float * matrixB, float * result) {
 	// copy
 	cudaError_t cudaStat = cudaSuccess;
-	double *d_A = NULL;
-	cudaStat = cudaMalloc((void**)&d_A, sizeof(double) * rows * k);
+	float *d_A = NULL;
+	cudaStat = cudaMalloc((void**)&d_A, sizeof(float) * rows * k);
 	assert(cudaSuccess == cudaStat);
-	double * d_B = NULL;
-	cudaStat = cudaMalloc((void**)&d_B, sizeof(double) * k * cols);
+	float * d_B = NULL;
+	cudaStat = cudaMalloc((void**)&d_B, sizeof(float) * k * cols);
 	assert(cudaSuccess == cudaStat);
-	double * d_Result = NULL;
-	cudaStat = cudaMalloc((void**)&d_Result, sizeof(double) * rows * cols);
+	float * d_Result = NULL;
+	cudaStat = cudaMalloc((void**)&d_Result, sizeof(float) * rows * cols);
 	assert(cudaSuccess == cudaStat);
 
-	cudaStat = cudaMemcpy(d_A, matrixA, sizeof(double) * rows * k, cudaMemcpyHostToDevice);
+	cudaStat = cudaMemcpy(d_A, matrixA, sizeof(float) * rows * k, cudaMemcpyHostToDevice);
 	assert(cudaSuccess == cudaStat);
-	cudaStat = cudaMemcpy(d_B, matrixB, sizeof(double) * k * cols, cudaMemcpyHostToDevice);
+	cudaStat = cudaMemcpy(d_B, matrixB, sizeof(float) * k * cols, cudaMemcpyHostToDevice);
 	assert(cudaSuccess == cudaStat);
 
 	row_major_2_col_major_device(rows, k, d_A);
@@ -430,9 +430,9 @@ void multiply(int rows, int k, int cols, double * matrixA, double * matrixB, dou
 
 	// A := U*W
 	assert(cudaSuccess == cudaStat);
-	const double h_one = 1;
-	const double h_zero = 0;
-	cublas_status = cublasDgemm_v2(
+	const float h_one = 1;
+	const float h_zero = 0;
+	cublas_status = cublasSgemm_v2(
 		cublasH,
 		CUBLAS_OP_N,
 		CUBLAS_OP_N,
@@ -452,7 +452,7 @@ void multiply(int rows, int k, int cols, double * matrixA, double * matrixB, dou
 	// copy
 	col_major_2_row_major_device(rows, cols, d_Result);
 
-	cudaStat = cudaMemcpy(result, d_Result, sizeof(double) * rows * cols, cudaMemcpyDeviceToHost);
+	cudaStat = cudaMemcpy(result, d_Result, sizeof(float) * rows * cols, cudaMemcpyDeviceToHost);
 	assert(cudaSuccess == cudaStat);
 
 	// free
