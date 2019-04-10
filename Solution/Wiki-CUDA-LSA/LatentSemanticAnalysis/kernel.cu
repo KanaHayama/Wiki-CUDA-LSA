@@ -1,8 +1,8 @@
 
 #include<iostream>
-
-#include"../ParallelTDIDF/tdidf.cuh"
-#include"../LargeMatrixParallelSVD/svd.cuh"
+#include<map>
+#include<tfidf.cuh>
+#include<svd.cuh>
 #include"lsa.cuh"
 
 const auto test_TD_docs = 12;
@@ -22,6 +22,8 @@ static double test_doc_term_freq[test_TD_docs * test_TD_terms] = {
 	0, 0, 0, 0, 0, 0, 1, 1, 1,
 	0, 0, 0, 0, 0, 0, 0, 1, 1,
 };
+
+const std::map<int, std::string> docIdxLookUp = {0, ""};
 
 const auto test_k = 2;
 
@@ -68,8 +70,8 @@ int main(){
 	const int n = test_TD_terms;
 	const int k = test_k;
 	const int lda = m;
-	//TD->IDF
-	//TODO:
+	//TD/IDF
+	tfidf(m, n, test_doc_term_freq);
 	//svd
 	double U[lda * k];
 	double S[k];
