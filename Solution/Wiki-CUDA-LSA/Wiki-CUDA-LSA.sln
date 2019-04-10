@@ -12,6 +12,9 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "StemmingAndLemmatization", "StemmingAndLemmatization\StemmingAndLemmatization.vcxproj", "{980127D6-9FDC-43F0-A0BA-2ED9500DA57C}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LatentSemanticAnalysis", "LatentSemanticAnalysis\LatentSemanticAnalysis.vcxproj", "{433C984A-6D6B-4E2A-ADD5-BA87BE67E353}"
+	ProjectSection(ProjectDependencies) = postProject
+		{764FFC4C-0B16-4060-AF42-5C22B6AC4F11} = {764FFC4C-0B16-4060-AF42-5C22B6AC4F11}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

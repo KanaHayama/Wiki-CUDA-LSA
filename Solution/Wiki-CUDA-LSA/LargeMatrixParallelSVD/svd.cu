@@ -4,8 +4,33 @@
 #include <cublas_v2.h>
 #include <cusolverDn.h>
 
+//TODO: parallelize
+void row_major_2_col_major(int rows, int cols, double * matrix) {
+	double * temp = new double[rows * cols];
+	memcpy(temp, matrix, sizeof(double) * rows * cols);
+	for (int row = 0; row < rows; row++) {
+		for (int col = 0; col < cols; col++) {
+			matrix[col * rows + row] = temp[row * cols + col];
+		}
+	}
+	delete[] temp;
+}
+
+//TODO: parallelize
+void col_major_2_row_major(int rows, int cols, double * matrix) {
+	double * temp = new double[rows * cols];
+	memcpy(temp, matrix, sizeof(double) * rows * cols);
+	for (int row = 0; row < rows; row++) {
+		for (int col = 0; col < cols; col++) {
+			matrix[row * cols + col] = temp[col * rows + row];
+		}
+	}
+	delete[] temp;
+}
+
 void svd(int rows, int cols, double * matrix_A, double * matrix_U, double * array_S, double * matrix_VT) {
-	
+	assert(rows >= cols);
+	row_major_2_col_major(rows, cols, matrix_A);
 	// step 1: create cusolverDn handle
 	cusolverDnHandle_t cusolverH = NULL;
 	cusolverStatus_t cusolver_status = CUSOLVER_STATUS_SUCCESS;
@@ -76,6 +101,7 @@ void svd(int rows, int cols, double * matrix_A, double * matrix_U, double * arra
 	if (matrix_U) {
 		cudaStat = cudaMemcpy(matrix_U, d_U, sizeof(double) * lda * rows, cudaMemcpyDeviceToHost);
 		assert(cudaSuccess == cudaStat);
+		col_major_2_row_major(lda, rows, matrix_U);
 	}
 	if (array_S) {
 		cudaStat = cudaMemcpy(array_S, d_S, sizeof(double) * cols, cudaMemcpyDeviceToHost);
@@ -84,6 +110,7 @@ void svd(int rows, int cols, double * matrix_A, double * matrix_U, double * arra
 	if (matrix_VT) {
 		cudaStat = cudaMemcpy(matrix_VT, d_VT, sizeof(double) * lda * cols, cudaMemcpyDeviceToHost);
 		assert(cudaSuccess == cudaStat);
+		col_major_2_row_major(lda, cols, matrix_VT);
 	}
 	int info_gpu = 0;
 	cudaStat = cudaMemcpy(&info_gpu, devInfo, sizeof(int), cudaMemcpyDeviceToHost);
@@ -193,7 +220,9 @@ void svd_r(int rows, int cols, double * matrix_U, double * array_S, double * mat
 
 //TODO: use k to speed up svd, rather than apply after svd
 void approximate_svd(int rows, int cols, int k, double * matrix_A, double * matrix_U, double * array_S, double * matrix_VT) {
+	assert(rows >= cols);
 	assert(k <= rows && k <= cols);
+	row_major_2_col_major(rows, cols, matrix_A);
 	// step 1: create cusolverDn handle
 	cusolverDnHandle_t cusolverH = NULL;
 	cusolverStatus_t cusolver_status = CUSOLVER_STATUS_SUCCESS;
@@ -262,18 +291,20 @@ void approximate_svd(int rows, int cols, int k, double * matrix_A, double * matr
 
 	// step 5: copy back
 	if (matrix_U) {
-		for (int i = 0; i < lda; i++) {
-			cudaStat = cudaMemcpy(matrix_U + i * k, d_U + i * rows, sizeof(double) * k, cudaMemcpyDeviceToHost);
-			assert(cudaSuccess == cudaStat);
-		}
+		cudaStat = cudaMemcpy(matrix_U, d_U, sizeof(double) * lda * k, cudaMemcpyDeviceToHost);
+		assert(cudaSuccess == cudaStat);
+		col_major_2_row_major(lda, k, matrix_U);
 	}
 	if (array_S) {
 		cudaStat = cudaMemcpy(array_S, d_S, sizeof(double) * k, cudaMemcpyDeviceToHost);
 		assert(cudaSuccess == cudaStat);
 	}
 	if (matrix_VT) {
-		cudaStat = cudaMemcpy(matrix_VT, d_VT, sizeof(double) * k * cols, cudaMemcpyDeviceToHost);
-		assert(cudaSuccess == cudaStat);
+		for (int i = 0; i < cols; i++) {
+			cudaStat = cudaMemcpy(matrix_VT + i * k, d_VT + i * lda, sizeof(double) * k, cudaMemcpyDeviceToHost);
+			assert(cudaSuccess == cudaStat);
+		}
+		col_major_2_row_major(k, cols, matrix_VT);
 	}
 	int info_gpu = 0;
 	cudaStat = cudaMemcpy(&info_gpu, devInfo, sizeof(int), cudaMemcpyDeviceToHost);

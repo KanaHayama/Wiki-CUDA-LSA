@@ -183,8 +183,69 @@ c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\surface_indirec
 c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\cuda_runtime_api.h
 c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\device_launch_parameters.h
 c:\program files\nvidia gpu computing toolkit\cuda\v10.0\include\vector_types.h
-C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.0\include\cuda_runtime.h
-C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.0\include\device_launch_parameters.h
+C:\Program Files\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\iostream
+C:\Program Files\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\istream
+C:\Program Files\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\ostream
+C:\Program Files\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\ios
+C:\Program Files\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\xlocnum
+C:\Program Files\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\climits
+C:\Program Files\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\cstdio
 C:\Program Files (x86)\Windows Kits\10\Include\10.0.17134.0\ucrt\stdio.h
 C:\Program Files (x86)\Windows Kits\10\Include\10.0.17134.0\ucrt\corecrt_wstdio.h
 C:\Program Files (x86)\Windows Kits\10\Include\10.0.17134.0\ucrt\corecrt_stdio_config.h
+C:\Program Files\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\streambuf
+C:\Program Files\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\xiosbase
+C:\Program Files\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\xlocale
+C:\Program Files\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\cstring
+C:\Program Files\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\stdexcept
+C:\Program Files\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\exception
+C:\Program Files\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\type_traits
+C:\Program Files\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\xstddef
+C:\Program Files\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\cstddef
+C:\Program Files\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\initializer_list
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.17134.0\ucrt\malloc.h
+C:\Program Files\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\vcruntime_exception.h
+C:\Program Files\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\eh.h
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.17134.0\ucrt\corecrt_terminate.h
+C:\Program Files\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\xstring
+C:\Program Files\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\xmemory0
+C:\Program Files\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\cstdint
+C:\Program Files\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\stdint.h
+C:\Program Files\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\limits
+C:\Program Files\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\ymath.h
+C:\Program Files\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\cfloat
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.17134.0\ucrt\float.h
+C:\Program Files\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\cwchar
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.17134.0\ucrt\wchar.h
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.17134.0\ucrt\corecrt_wconio.h
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.17134.0\ucrt\corecrt_wctype.h
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.17134.0\ucrt\corecrt_wdirect.h
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.17134.0\ucrt\corecrt_wio.h
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.17134.0\ucrt\corecrt_share.h
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.17134.0\ucrt\corecrt_wprocess.h
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.17134.0\ucrt\sys/stat.h
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.17134.0\ucrt\sys/types.h
+C:\Program Files\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\new
+C:\Program Files\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\xutility
+C:\Program Files\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\utility
+C:\Program Files\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\iosfwd
+C:\Program Files\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\xatomic0.h
+C:\Program Files\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\intrin0.h
+C:\Program Files\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\typeinfo
+C:\Program Files\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\vcruntime_typeinfo.h
+C:\Program Files\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\xlocinfo
+C:\Program Files\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\xlocinfo.h
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.17134.0\ucrt\ctype.h
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.17134.0\ucrt\locale.h
+C:\Program Files\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\memory
+C:\Program Files\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\xmemory
+C:\Program Files\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\xfacet
+C:\Program Files\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\system_error
+C:\Program Files\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\cerrno
+C:\Program Files\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\xcall_once.h
+C:\Program Files\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\xerrc.h
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.17134.0\ucrt\share.h
+d:\d\project\mine\wiki-cuda-lsa\solution\wiki-cuda-lsa\latentsemanticanalysis\lsa.cuh
+C:\Program Files\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\vector
+C:\Program Files\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\tuple
+d:\d\project\mine\wiki-cuda-lsa\solution\wiki-cuda-lsa\latentsemanticanalysis\../LargeMatrixParallelSVD/svd.cuh
