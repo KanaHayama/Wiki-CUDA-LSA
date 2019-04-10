@@ -2,6 +2,7 @@
 
 #include<cmath>
 
+//TODO: parallelize
 void tfidf(int rows, int cols, double * matrix) {
 	int numDocs = rows;
 	int numTerms = cols;

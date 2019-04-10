@@ -23,8 +23,6 @@ static double test_doc_term_freq[test_TD_docs * test_TD_terms] = {
 	0, 0, 0, 0, 0, 0, 0, 1, 1,
 };
 
-const std::map<int, std::string> docIdxLookUp = {0, ""};
-
 const auto test_k = 2;
 
 const auto numConcept = 2;
@@ -40,7 +38,7 @@ void printColMajorMatrix(int m, int n, const double*A, int lda, const char* name
 	}
 }
 
-void printRowMajorMatrix(int m, int n, const double*A, int lda, const char* name) {
+void printRowMajorMatrix(int m, int n, const double*A, const char* name) {
 	for (int row = 0; row < m; row++) {
 		for (int col = 0; col < n; col++) {
 			double Areg = A[row * n + col];
@@ -65,6 +63,15 @@ void printConcepts(const int numConcept, const int numTerms, const int numDocs, 
 	}
 }
 
+void printTermTerm(const int lookUpIdx, const std::vector<std::tuple<int, double>> termTerm) {
+	std::cout << "Term correlation to term index " << lookUpIdx << " ranking:" << std::endl;
+	std::cout << "\t";
+	for(auto & t : termTerm) {
+		std::cout << std::get<0>(t) << "(" << std::get<1>(t) << "), ";
+	}
+	std::cout << std::endl;
+}
+
 int main(){
 	const int m = test_TD_docs;
 	const int n = test_TD_terms;
@@ -81,19 +88,57 @@ int main(){
 	printf("=====\n");
 	approximate_svd(m, n, k, test_doc_term_freq, U, S, VT);
 	printf("U = \n");
-	printRowMajorMatrix(m, k, U, lda, "U");
+	printRowMajorMatrix(m, k, U, "U");
 	printf("=====\n");
 	printf("S = \n");
-	printRowMajorMatrix(k, 1, S, lda, "S");
+	printRowMajorMatrix(k, 1, S, "S");
 	printf("=====\n");
 	printf("VT = \n");
-	printRowMajorMatrix(k, n, VT, lda, "VT");
+	printRowMajorMatrix(k, n, VT, "VT");
+	printf("=====\n");
+	printf("V = \n");
+	double V[n * k];
+	memcpy(V, VT, sizeof(double) * k * n);
+	transpose(k, n, V);
+	printRowMajorMatrix(n, k, V, "V");
 	printf("=====\n");
 	//concepts
 	auto topTerms = topTermsInTopConcepts(k, n, VT, numConcept, numTerms);
 	auto topDocs = topDocsInTopConcepts(m, k, U, numConcept, numDocs);
 	printConcepts(numConcept, numTerms, numDocs, topTerms, topDocs);
+	printf("=====\n");
 	//corrolated
-	//TODO:
+	printf("V*S = \n");
+	double VS[n * k];
+	memcpy(VS, V, sizeof(double) * k * n);
+	multiplyByDiagonalMatrix(n, k, VS, S);
+	printRowMajorMatrix(n, k, VS, "VS");
+	printf("=====\n");
+
+	printf("norm(V*S) = \n");
+	double normVS[n * k];
+	memcpy(normVS, VS, sizeof(double) * k * n);
+	rowsNormalized(n, k, normVS);
+	printRowMajorMatrix(n, k, normVS, "normVS");
+	printf("=====\n");
+
+	printf("U*S = \n");
+	double US[m * k];
+	memcpy(US, U, sizeof(double) * k * m);
+	multiplyByDiagonalMatrix(m, k, US, S);
+	printRowMajorMatrix(m, k, US, "US");
+	printf("=====\n");
+
+	printf("norm(U*S) = \n");
+	double normUS[m * k];
+	memcpy(normUS, US, sizeof(double) * k * m);
+	rowsNormalized(m, k, normUS);
+	printRowMajorMatrix(m, k, normUS, "normUS");
+	printf("=====\n");
+
+	int lookUpTermIdx = 0;
+	auto termTerm = topTermsForTerm(n, k, normVS, lookUpTermIdx);
+	printTermTerm(lookUpTermIdx, termTerm);
+
     return 0;
 }

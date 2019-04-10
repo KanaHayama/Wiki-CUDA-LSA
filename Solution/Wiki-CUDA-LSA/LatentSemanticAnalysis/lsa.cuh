@@ -9,4 +9,8 @@ std::vector<std::vector<std::tuple<int, double>>> topTermsInTopConcepts(int rows
 
 std::vector<std::vector<std::tuple<int, double>>> topDocsInTopConcepts(int rows, int cols, double * matrix_U, int numConcepts, int numDocs);
 
+void rowsNormalized(int rows, int cols, double * matrix);
+
+std::vector<std::tuple<int, double>> topTermsForTerm(int rows, int cols, double * normVS, int termIdx);
+
 #endif // _INC_LSA

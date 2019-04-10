@@ -43,11 +43,11 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <LibraryPath>$(LibraryPath)</LibraryPath>
-    <IncludePath>$(SolutionDir)\LargeMatrixParallelSVD\;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)\LargeMatrixParallelSVD\;$(SolutionDir)\ParallelTFIDF\;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LibraryPath>$(LibraryPath)</LibraryPath>
-    <IncludePath>$(SolutionDir)\LargeMatrixParallelSVD\;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)\LargeMatrixParallelSVD\;$(SolutionDir)\ParallelTFIDF\;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>

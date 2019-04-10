@@ -1,4 +1,5 @@
 #include"lsa.cuh"
+#include<svd.cuh>
 
 #include<cassert>
 #include<algorithm>
@@ -44,4 +45,35 @@ std::vector<std::vector<std::tuple<int, double>>> topDocsInTopConcepts(int rows,
 		topDocs.push_back(conceptTopDocs);
 	}
 	return topDocs;
+}
+
+
+//TODO: parallelize
+void rowsNormalized(int rows, int cols, double * matrix) {
+	for (int i = 0; i < rows; i++) {
+		double sqrSum = 0;
+		for (int j = 0; j < cols; j++) {
+			sqrSum += pow(matrix[i * cols + j], 2);
+		}
+		for (int j = 0; j < cols; j++) {
+			matrix[i * cols + j] /= sqrSum;
+		}
+	}
+}
+
+//TODO: return void
+//TODO: parallelize
+std::vector<std::tuple<int, double>> topTermsForTerm(int rows, int cols, double * normVS, int termIdx) {
+	double * rowVec = new double[cols];
+	memcpy(rowVec, normVS + termIdx * cols, sizeof(double) * cols);
+	double * resultVec = new double[rows];
+	multiply(rows, cols, 1, normVS, rowVec, resultVec);
+	auto termScores = std::vector<std::tuple<int, double>>();
+	for (int i = 0; i < rows; i++) {
+		termScores.push_back(std::make_tuple(i, resultVec[i]));
+	}
+	sort(termScores.begin(), termScores.end(), [](auto a, auto b) {return std::get<1>(a) > std::get<1>(b); });//weight desc
+	delete[] resultVec;
+	delete[] rowVec;
+	return termScores;
 }
