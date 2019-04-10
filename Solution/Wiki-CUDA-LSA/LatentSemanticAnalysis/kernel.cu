@@ -1,8 +1,9 @@
 
 #include<iostream>
 
-#include"lsa.cuh"
+#include"../ParallelTDIDF/tdidf.cuh"
 #include"../LargeMatrixParallelSVD/svd.cuh"
+#include"lsa.cuh"
 
 const auto test_TD_docs = 12;
 const auto test_TD_terms = 9;
@@ -67,6 +68,8 @@ int main(){
 	const int n = test_TD_terms;
 	const int k = test_k;
 	const int lda = m;
+	//TD->IDF
+	//TODO:
 	//svd
 	double U[lda * k];
 	double S[k];
@@ -88,7 +91,7 @@ int main(){
 	auto topTerms = topTermsInTopConcepts(k, n, VT, numConcept, numTerms);
 	auto topDocs = topDocsInTopConcepts(m, k, U, numConcept, numDocs);
 	printConcepts(numConcept, numTerms, numDocs, topTerms, topDocs);
-	//term-term
-	
+	//corrolated
+	//TODO:
     return 0;
 }
