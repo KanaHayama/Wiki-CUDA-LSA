@@ -89,6 +89,8 @@ if __name__ == "__main__":
 		if args.articles is not None and len(handler._pages) >= args.articles:
 			break
 	
+	from datetime import datetime
+	print(datetime.now())
 	title_doc_pairs = handler._pages
 	# print(title_doc_pairs)
 	docs_clean = [preprocess_data(pair[1]) for pair in title_doc_pairs]
