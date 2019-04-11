@@ -72,7 +72,7 @@ def print_doc_term_freq_matrix(doc_term_freq_matrix, file=sys.stdout):
 
 
 if __name__ == "__main__":
-	parser = argparse.ArgumentParser(description = "For USC EE569 2019 spring home work 5 by Zongjian Li.")
+	parser = argparse.ArgumentParser(description = "For USC EE451 2019 spring home work.")
 	parser.add_argument("-a", "--articles", type=int, default=None, help=".")
 	parser.add_argument("-i", "--input", nargs='?', type=argparse.FileType('r'), default=sys.stdin, help="")
 	parser.add_argument("-o", "--output", nargs='?', type=argparse.FileType('w'), default=sys.stdout, help="")
