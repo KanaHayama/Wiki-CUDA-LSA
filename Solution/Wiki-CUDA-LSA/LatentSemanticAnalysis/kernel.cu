@@ -6,6 +6,7 @@
 #include<svd.cuh>
 #include<string>
 #include<cassert>
+#include<algorithm>
 #include"lsa.cuh"
 
 using std::vector;
@@ -13,6 +14,24 @@ using std::string;
 using std::unique_ptr;
 using std::shared_ptr;
 using std::get;
+using std::cout;
+using std::endl;
+
+//#define PRINT_MATRIX
+
+void printMatrix(const char* name, int m, int n, const float*A) {
+#ifdef PRINT_MATRIX
+	std::cout << name << ":" << std::endl;
+	for (int row = 0; row < m; row++) {
+		for (int col = 0; col < n; col++) {
+			float Areg = A[row * n + col];
+			std::cout.width(15);
+			std::cout << Areg;
+		}
+		std::cout << std::endl;
+	}
+#endif // PRINT_MATRIX
+}
 
 shared_ptr<float> read(const string filename, int & numDocs, int & numTerms, vector<string> & docTitles, vector<string> & terms) {
 	auto f = std::ifstream(filename);
@@ -87,44 +106,51 @@ void printTermRelated(const int termIdx, const int numTop, const std::vector<std
 	std::cout << std::endl;
 }
 
-const int show_top = 5;
-
-void lsa_demo(const int numDocs, const int numTerms, float * docTermFreq, const vector<string> docTitles, const vector<string> terms, const int numConcepts) {
-	
-	auto transposed = false;
+void lsa_demo(const int numDocs, const int numTerms, float * docTermFreq, const vector<string> docTitles, const vector<string> terms, const int numConcepts, const int numShowTop) {
+		
 	auto m = numDocs;
 	auto n = numTerms;
 	auto k = numConcepts;
+	printMatrix("TF", m, n, docTermFreq);
+	tfidf(m, n, docTermFreq);
+	printMatrix("IDF", m, n, docTermFreq);
+	auto transposed = false;
 	if (numDocs < numTerms) {
 		transpose(numDocs, numTerms, docTermFreq);
 		m = numTerms;
 		n = numDocs;
 		transposed = true;
-	}
-	tfidf(m, n, docTermFreq);
+	}	
 	auto u = unique_ptr<float>(new float[m * k]);
 	auto s = unique_ptr<float>(new float[k]);
 	auto vt = unique_ptr<float>(new float[k * n]);
 	approximate_svd(m, n, k, docTermFreq, u.get(), s.get(), vt.get());
+	auto v = unique_ptr<float>();
+	v.swap(vt);
+	transpose(k, n, v.get());
 	if (transposed) {
-		u.swap(vt);
+		u.swap(v);
 		auto temp = m;
 		m = n;
 		n = temp;
 	}
-	auto v = unique_ptr<float>();
-	v.swap(vt);
-	transpose(k, n, v.get());
+	printMatrix("U", m, k, u.get());
+	printMatrix("S", 1, k, s.get());
+	printMatrix("V", n, k, v.get());
 	// print concepts
-	auto topTerms = topElementsInTopConcepts(n, k, v.get(), show_top, show_top);
-	auto topDocs = topElementsInTopConcepts(m, k, u.get(), show_top, show_top);
-	printConcepts(show_top, show_top, show_top, topDocs, topTerms, terms, docTitles);
+	auto topTerms = topElementsInTopConcepts(n, k, v.get(), numShowTop, numShowTop);
+	auto topDocs = topElementsInTopConcepts(m, k, u.get(), numShowTop, numShowTop);
+	printConcepts(numShowTop, numShowTop, numShowTop, topDocs, topTerms, terms, docTitles);
 
 	//corrolated
 	multiplyByDiagonalMatrix(n, k, v.get(), s.get());
+	printMatrix("VS", n, k, v.get());
 	rowsNormalized(n, k, v.get());
+	printMatrix("normVS", n, k, v.get());
 	multiplyByDiagonalMatrix(m, k, u.get(), s.get());
+	printMatrix("US", m, k, u.get());
 	rowsNormalized(m, k, u.get());
+	printMatrix("normUS", m, k, u.get());
 	while (true) {
 		try {
 			std::cout << std::endl;
@@ -132,9 +158,14 @@ void lsa_demo(const int numDocs, const int numTerms, float * docTermFreq, const 
 			char buf[1024];
 			std::cin.getline(buf, 1024);
 			string term(buf);
-			if (term == "!") {
+			//trim
+			if (term.empty()) {
 				break;
 			}
+			term.erase(0, term.find_first_not_of(" "));
+			term.erase(term.find_last_not_of(" ") + 1);
+			//lower case
+			std::transform(term.begin(), term.end(), term.begin(), ::tolower);
 			auto termIdx = -1;
 			for (auto i = 0; i < numTerms; i++) {
 				if (terms[i] == term) {
@@ -149,7 +180,7 @@ void lsa_demo(const int numDocs, const int numTerms, float * docTermFreq, const 
 			auto termTerm = topsForTerm(n, k, v.get(), n, k, v.get(), termIdx);
 			auto termDoc = topsForTerm(m, k, u.get(), n, k, v.get(), termIdx);
 
-			printTermRelated(termIdx, show_top, termTerm, termDoc, terms, docTitles);
+			printTermRelated(termIdx, numShowTop, termTerm, termDoc, terms, docTitles);
 		} catch (std::exception e) {
 			std::cout << e.what() << std::endl;
 		}
@@ -160,25 +191,34 @@ void lsa_demo(const int numDocs, const int numTerms, float * docTermFreq, const 
 int main(int argc, char *argv[]){
 	std::cout << "This is CUDA-SPARCE-SMALL LSA demo for EE451 Team7 course project. CUDA-SPARCE-LARGE is on the way. SPARK-SPARCE-LARGE is ready else where." << std::endl;
 
-	assert(argc == 3);
+	assert(argc >= 2);
 	int numDocs, numTerms;
 	auto docTitles = vector<string>();
 	auto terms = vector<string>();
-	auto doc_term_freq_mat = read(argv[1], numDocs, numTerms, docTitles, terms);
-	auto numConcepts = atoi(argv[2]);
-
-	std::cout << "Read " << numDocs << " docs, " << numTerms << " terms." << std::endl;
-	auto not_0_count = 0;
-	for (auto i = 0; i < numDocs; i++) {
-		for (auto j = 0; j < numTerms; j++) {
-			if (doc_term_freq_mat.get()[i * numTerms + j] != 0) {
-				not_0_count++;
-			}
-		}
+	auto filename = string(argv[1]);
+	auto numConcepts = std::numeric_limits<int>::max();
+	if (argc >= 3) {
+		numConcepts = atoi(argv[2]);
 	}
-	//std::cout << not_0_count / double(numDocs * numTerms) << " non zero element(s)." << std::endl;
+	auto numShowTop = 5;
+	if (argc >= 4) {
+		numShowTop = atoi(argv[3]);
+	}
+	cout << "filename=" << filename << "\t" << "#concept=" << numConcepts << "\t" << "#show=" << numShowTop << endl;
 	
-	
-	lsa_demo(numDocs, numTerms, doc_term_freq_mat.get(), docTitles, terms, numConcepts);
+	auto doc_term_freq_mat = read(filename, numDocs, numTerms, docTitles, terms);
+	std::cout << "Read " << numDocs << " docs, " << numTerms << " terms." << std::endl;
+	auto minNumConcept = std::min(numDocs, numTerms);
+	if (minNumConcept < numConcepts) {
+		cout << "Note: #concept " << numConcepts << " -> " << minNumConcept << endl;
+		numConcepts = minNumConcept;
+	}
+	auto minNumShowTop = std::min(numConcepts, numShowTop);
+	if (minNumShowTop < numShowTop) {
+		cout << "Note: #show " << numShowTop << " -> " << minNumShowTop << endl;
+		numShowTop = minNumShowTop;
+	}
+
+	lsa_demo(numDocs, numTerms, doc_term_freq_mat.get(), docTitles, terms, numConcepts, numShowTop);
     return 0;
 }

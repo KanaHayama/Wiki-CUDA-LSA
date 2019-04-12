@@ -3,6 +3,7 @@
 
 #include<cassert>
 #include<algorithm>
+#include<iostream>
 
 //TODO: return void
 //TODO: parallelize
@@ -45,8 +46,11 @@ std::vector<std::tuple<int, float>> topsForTerm(int rows, int cols, float * norm
 	assert(cols == vCols);
 	float * rowVec = new float[vCols];
 	memcpy(rowVec, normVS + termIdx * vCols, sizeof(float) * vCols);
+	//printMatrix("normXS", rows, cols, normXS);
+	//printMatrix("rowVec", vCols, 1, rowVec);
 	float * resultVec = new float[rows];
 	multiply(rows, cols, 1, normXS, rowVec, resultVec);
+	//printMatrix("resultVec", rows, 1, resultVec);
 	auto docScores = std::vector<std::tuple<int, float>>();
 	for (int i = 0; i < rows; i++) {
 		docScores.push_back(std::make_tuple(i, resultVec[i]));
