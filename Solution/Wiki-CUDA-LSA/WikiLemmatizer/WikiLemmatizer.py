@@ -74,8 +74,9 @@ def print_doc_term_freq_matrix(doc_term_freq_matrix, file=sys.stdout):
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser(description = "For USC EE451 2019 spring home work.")
 	parser.add_argument("-a", "--articles", type=int, default=None, help=".")
-	parser.add_argument("-i", "--input", nargs='?', type=argparse.FileType('r'), default=sys.stdin, help="")
-	parser.add_argument("-o", "--output", nargs='?', type=argparse.FileType('w'), default=sys.stdout, help="")
+	parser.add_argument("-z", "--zipped", action="store_true", default=False, help="")
+	parser.add_argument("-i", "--input", nargs='?', type=argparse.FileType('r', encoding='UTF-8'), default=sys.stdin, help="")
+	parser.add_argument("-o", "--output", nargs='?', type=argparse.FileType('w', encoding='UTF-8'), default=sys.stdout, help="")
 	args = parser.parse_args()
 
 	# Object for handling xml
@@ -84,7 +85,8 @@ if __name__ == "__main__":
 	parser = xml.sax.make_parser()
 	parser.setContentHandler(handler)
 	# Iteratively process file
-	for line in subprocess.Popen(['bzcat'], stdin = args.input, stdout = subprocess.PIPE).stdout:
+	input = subprocess.Popen(['bzcat'], stdin = args.input, stdout = subprocess.PIPE).stdout if args.zipped else args.input
+	for line in input:
 		parser.feed(line)
 		if args.articles is not None and len(handler._pages) >= args.articles:
 			break
