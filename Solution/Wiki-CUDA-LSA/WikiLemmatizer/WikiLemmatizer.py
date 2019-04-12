@@ -45,15 +45,7 @@ def prepare_corpus(docs_clean):
 	# Converting list of documents (corpus) into Document Term Matrix using dictionary prepared above.
 	sparse = [dictionary.doc2bow(doc) for doc in docs_clean]
 	# generate LDA model
-	
-	doc_term_freq_matrix = []
-	numTerm = len(dictionary)
-	for doc_terms in sparse:
-		term_freq = [0 for _ in range(numTerm)]
-		for id, count in doc_terms:
-			term_freq[id] = count
-		doc_term_freq_matrix.append(term_freq)
-	return dictionary, doc_term_freq_matrix
+	return dictionary, sparse
 
 def print_terms(dictionary, file=sys.stdout):
 	# print("Terms:", file=file)
@@ -68,7 +60,9 @@ def print_doc_titles(titles, file=sys.stdout):
 def print_doc_term_freq_matrix(doc_term_freq_matrix, file=sys.stdout):
 	# print("Doc term freq matrix:", file=file)
 	for doc_freq in doc_term_freq_matrix:
-		print(" ".join(str(freq) for freq in doc_freq), file=file)
+		print(len(doc_freq), file=file)
+		for id, freq in doc_freq:
+			print("{} {}".format(id, freq), file=file)
 
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser(description = "For USC EE451 2019 spring home work.")
@@ -95,9 +89,9 @@ if __name__ == "__main__":
 	title_doc_pairs = handler._pages
 	# print(title_doc_pairs)
 	docs_clean = [preprocess_data(pair[1]) for pair in title_doc_pairs]
-	term_dict, doc_term_freq_matrix = prepare_corpus(docs_clean)
+	term_dict, sparse = prepare_corpus(docs_clean)
 	title_dict = [(i, title_doc_pairs[i][0]) for i in range(len(title_doc_pairs))]
 	print("{} {}".format(len(docs_clean), len(term_dict)), file=args.output)
 	print_doc_titles(title_dict, args.output)
 	print_terms(term_dict, args.output)
-	print_doc_term_freq_matrix(doc_term_freq_matrix, args.output)
+	print_doc_term_freq_matrix(sparse, args.output)

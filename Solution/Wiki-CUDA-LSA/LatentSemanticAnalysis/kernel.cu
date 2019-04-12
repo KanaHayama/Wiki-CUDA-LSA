@@ -30,11 +30,14 @@ shared_ptr<float> read(const string filename, int & numDocs, int & numTerms, vec
 		terms.push_back(string(buf));
 	}
 	auto term_freq_mat = shared_ptr<float>(new float[numDocs * numTerms]);
-	for (auto i = 0; i < numDocs; i++) {
-		for (auto j = 0; j < numTerms; j++) {
-			int val;
-			f >> val;
-			term_freq_mat.get()[i * numTerms + j] = val;
+	memset(term_freq_mat.get(), 0, sizeof(float) * numDocs * numTerms);
+	for (auto docIdx = 0; docIdx < numDocs; docIdx++) {
+		int numTermsInDoc;
+		f >> numTermsInDoc;
+		for (auto j = 0; j < numTermsInDoc; j++) {
+			int termIdx, freq;
+			f >> termIdx >> freq;
+			term_freq_mat.get()[docIdx * numTerms + termIdx] = freq;
 		}
 	}
 	f.close();
@@ -123,41 +126,46 @@ void lsa_demo(const int numDocs, const int numTerms, float * docTermFreq, const 
 	multiplyByDiagonalMatrix(m, k, u.get(), s.get());
 	rowsNormalized(m, k, u.get());
 	while (true) {
-		std::cout << std::endl;
-		std::cout << "Query term: ";
-		char buf[1024];
-		std::cin.getline(buf, 1024);
-		string term(buf);
-		if (term == "!") {
-			break;
-		}
-		auto termIdx = -1;
-		for (auto i = 0; i < numTerms; i++) {
-			if (terms[i] == term) {
-				termIdx = i;
+		try {
+			std::cout << std::endl;
+			std::cout << "Query term: ";
+			char buf[1024];
+			std::cin.getline(buf, 1024);
+			string term(buf);
+			if (term == "!") {
 				break;
 			}
+			auto termIdx = -1;
+			for (auto i = 0; i < numTerms; i++) {
+				if (terms[i] == term) {
+					termIdx = i;
+					break;
+				}
+			}
+			if (termIdx < 0) {
+				std::cout << "Term not exist." << std::endl;
+				continue;
+			}
+			auto termTerm = topsForTerm(n, k, v.get(), n, k, v.get(), termIdx);
+			auto termDoc = topsForTerm(m, k, u.get(), n, k, v.get(), termIdx);
+
+			printTermRelated(termIdx, show_top, termTerm, termDoc, terms, docTitles);
+		} catch (std::exception e) {
+			std::cout << e.what() << std::endl;
 		}
-		if (termIdx < 0) {
-			std::cout << "Term not exist." << std::endl;
-			continue;
-		}
-		auto termTerm = topsForTerm(n, k, v.get(), n, k, v.get(), termIdx);
-		auto termDoc = topsForTerm(m, k, u.get(), n, k, v.get(), termIdx);
-		
-		printTermRelated(termIdx, show_top, termTerm, termDoc, terms, docTitles);
 	}
 
 }
 
 int main(int argc, char *argv[]){
-	std::cout << "This is CUDA-DENSE-SMALL LSA demo for EE451 Team7 course project. CUDA-DENSE-LARGE & CUDA-SPARCE-LARGE is on the way. SPARK-DENSE-LARGE is ready else where. SPARK-SPARCE-LARGE is on the way." << std::endl;
+	std::cout << "This is CUDA-SPARCE-SMALL LSA demo for EE451 Team7 course project. CUDA-SPARCE-LARGE is on the way. SPARK-SPARCE-LARGE is ready else where." << std::endl;
 
-	assert(argc == 2);
+	assert(argc == 3);
 	int numDocs, numTerms;
 	auto docTitles = vector<string>();
 	auto terms = vector<string>();
 	auto doc_term_freq_mat = read(argv[1], numDocs, numTerms, docTitles, terms);
+	auto numConcepts = atoi(argv[2]);
 
 	std::cout << "Read " << numDocs << " docs, " << numTerms << " terms." << std::endl;
 	auto not_0_count = 0;
@@ -168,9 +176,9 @@ int main(int argc, char *argv[]){
 			}
 		}
 	}
-	std::cout << not_0_count / double(numDocs * numTerms) << " non zero element(s)." << std::endl;
+	//std::cout << not_0_count / double(numDocs * numTerms) << " non zero element(s)." << std::endl;
 	
-	auto numConcepts = (numDocs < numTerms ? numDocs : numTerms) / 10;
+	
 	lsa_demo(numDocs, numTerms, doc_term_freq_mat.get(), docTitles, terms, numConcepts);
     return 0;
 }
