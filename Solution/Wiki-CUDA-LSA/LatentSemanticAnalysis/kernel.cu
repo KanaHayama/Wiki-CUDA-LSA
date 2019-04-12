@@ -1,144 +1,176 @@
 
 #include<iostream>
-#include<map>
+#include<fstream>
+#include<vector>
 #include<tfidf.cuh>
 #include<svd.cuh>
+#include<string>
+#include<cassert>
 #include"lsa.cuh"
 
-const auto test_TD_docs = 12;
-const auto test_TD_terms = 9;
+using std::vector;
+using std::string;
+using std::unique_ptr;
+using std::shared_ptr;
+using std::get;
 
-static float test_doc_term_freq[test_TD_docs * test_TD_terms] = {
-	1, 0, 0, 1, 0, 0, 0, 0, 0,
-	1, 0, 1, 0, 0, 0, 0, 0, 0,
-	1, 1, 0, 0, 0, 0, 0, 0, 0,
-	0, 1, 1, 0, 1, 0, 0, 0, 0,
-	0, 1, 1, 2, 0, 0, 0, 0, 0,
-	0, 1, 0, 0, 1, 0, 0, 0, 0,
-	0, 1, 0, 0, 1, 0, 0, 0, 0,
-	0, 0, 1, 1, 0, 0, 0, 0, 0,
-	0, 1, 0, 0, 0, 0, 0, 0, 1,
-	0, 0, 0, 0, 0, 1, 1, 1, 0,
-	0, 0, 0, 0, 0, 0, 1, 1, 1,
-	0, 0, 0, 0, 0, 0, 0, 1, 1,
-};
-
-const auto test_k = 2;
-
-const auto numConcept = 2;
-const auto numTerms = 2;
-const auto numDocs = 2;
-
-void printColMajorMatrix(int m, int n, const float*A, int lda, const char* name) {
-	for (int row = 0; row < m; row++) {
-		for (int col = 0; col < n; col++) {
-			float Areg = A[col * m + row];
-			printf("%s(%d,%d) = %f\n", name, row, col, Areg);
+shared_ptr<float> read(const string filename, int & numDocs, int & numTerms, vector<string> & docTitles, vector<string> & terms) {
+	auto f = std::ifstream(filename);
+	assert(f.is_open());
+	f >> numDocs >> numTerms;
+	
+	char buf[1024];
+	f.getline(buf, 1024);
+	for (auto i = 0; i < numDocs; i++) {
+		f.getline(buf, 1024);
+		docTitles.push_back(string(buf));
+	}
+	for (auto i = 0; i < numTerms; i++) {
+		f.getline(buf, 1024);
+		terms.push_back(string(buf));
+	}
+	auto term_freq_mat = shared_ptr<float>(new float[numDocs * numTerms]);
+	for (auto i = 0; i < numDocs; i++) {
+		for (auto j = 0; j < numTerms; j++) {
+			int val;
+			f >> val;
+			term_freq_mat.get()[i * numTerms + j] = val;
 		}
 	}
+	f.close();
+	return term_freq_mat;
 }
 
-void printRowMajorMatrix(int m, int n, const float*A, const char* name) {
-	for (int row = 0; row < m; row++) {
-		for (int col = 0; col < n; col++) {
-			float Areg = A[row * n + col];
-			printf("%s(%d,%d) = %f\n", name, row, col, Areg);
-		}
-	}
-}
-
-void printConcepts(const int numConcept, const int numTerms, const int numDocs, const std::vector<std::vector<std::tuple<int, float>>> topTerms, const std::vector<std::vector<std::tuple<int, float>>> topDocs) {
+void printConcepts(const int numConcept, const int numTerms, const int numDocs, const std::vector<std::vector<std::tuple<int, float>>> topDocs, const std::vector<std::vector<std::tuple<int, float>>> topTerms, const vector<string> terms, const vector<string> docTitles) {
 	for (int c = 0; c < numConcept; c++) {
 		std::cout << "Concept " << c << ":" << std::endl;
-		std::cout << "\t" << "Top Term Idx: ";
+		std::cout << "\t" << "Top Terms: ";
 		for (int i = 0; i < numTerms; i++) {
-			std::cout << std::get<0>(topTerms[c][i]) << "(" << std::get<1>(topTerms[c][i]) << "), ";
+			std::cout << terms[get<0>(topTerms[c][i])] << "(" << get<1>(topTerms[c][i]) << "), ";
 		}
 		std::cout << std::endl;
-		std::cout << "\t" << "Top Doc Idx: ";
+		std::cout << "\t" << "Top Docs: ";
 		for (int i = 0; i < numDocs; i++) {
-			std::cout << std::get<0>(topDocs[c][i]) << "(" << std::get<1>(topDocs[c][i]) << "), ";
+			std::cout << "\"" << docTitles[get<0>(topDocs[c][i])] << "\"(" << get<1>(topDocs[c][i]) << "), ";
 		}
 		std::cout << std::endl;
 	}
 }
 
-void printTermTerm(const int lookUpIdx, const std::vector<std::tuple<int, float>> termTerm) {
-	std::cout << "Term correlation to term index " << lookUpIdx << " ranking:" << std::endl;
+void printTermRelated(const int termIdx, const int numTop, const std::vector<std::tuple<int, float>> termTerm, const std::vector<std::tuple<int, float>> termDoc, const vector<string> terms, const vector<string> docTitles) {
+	auto count = 0;
+	std::cout << "Top " << numTop << " terms correlates to term index " << termIdx << " :" << std::endl;
 	std::cout << "\t";
-	for(auto & t : termTerm) {
-		std::cout << std::get<0>(t) << "(" << std::get<1>(t) << "), ";
+	count = 0;
+	for (auto & t : termTerm) {
+		std::cout << terms[std::get<0>(t)] << "(" << std::get<1>(t) << "), ";
+		count++;
+		if (count >= numTop) {
+			break;
+		}
+	}
+	std::cout << std::endl;
+
+	std::cout << "Top " << numTop << " docs correlates to term index " << termIdx << " :" << std::endl;
+	std::cout << "\t";
+	count = 0;
+	for (auto & t : termDoc) {
+		std::cout << "\"" << docTitles[std::get<0>(t)] << "\"(" << std::get<1>(t) << "), ";
+		count++;
+		if (count >= numTop) {
+			break;
+		}
 	}
 	std::cout << std::endl;
 }
 
-int main(){
-	const int m = test_TD_docs;
-	const int n = test_TD_terms;
-	const int k = test_k;
-	const int lda = m;
-	//TF/IDF
-	tfidf(m, n, test_doc_term_freq);
-	//svd
-	float U[lda * k];
-	float S[k];
-	float VT[k * n];
-	printf("A = \n");
-	printColMajorMatrix(m, n, test_doc_term_freq, lda, "A");
-	printf("=====\n");
-	approximate_svd(m, n, k, test_doc_term_freq, U, S, VT);
-	printf("U = \n");
-	printRowMajorMatrix(m, k, U, "U");
-	printf("=====\n");
-	printf("S = \n");
-	printRowMajorMatrix(k, 1, S, "S");
-	printf("=====\n");
-	printf("VT = \n");
-	printRowMajorMatrix(k, n, VT, "VT");
-	printf("=====\n");
-	printf("V = \n");
-	float V[n * k];
-	memcpy(V, VT, sizeof(float) * k * n);
-	transpose(k, n, V);
-	printRowMajorMatrix(n, k, V, "V");
-	printf("=====\n");
-	//concepts
-	auto topTerms = topTermsInTopConcepts(k, n, VT, numConcept, numTerms);
-	auto topDocs = topDocsInTopConcepts(m, k, U, numConcept, numDocs);
-	printConcepts(numConcept, numTerms, numDocs, topTerms, topDocs);
-	printf("=====\n");
+const int show_top = 5;
+
+void lsa_demo(const int numDocs, const int numTerms, float * docTermFreq, const vector<string> docTitles, const vector<string> terms, const int numConcepts) {
+	
+	auto transposed = false;
+	auto m = numDocs;
+	auto n = numTerms;
+	auto k = numConcepts;
+	if (numDocs < numTerms) {
+		transpose(numDocs, numTerms, docTermFreq);
+		m = numTerms;
+		n = numDocs;
+		transposed = true;
+	}
+	tfidf(m, n, docTermFreq);
+	auto u = unique_ptr<float>(new float[m * k]);
+	auto s = unique_ptr<float>(new float[k]);
+	auto vt = unique_ptr<float>(new float[k * n]);
+	approximate_svd(m, n, k, docTermFreq, u.get(), s.get(), vt.get());
+	if (transposed) {
+		u.swap(vt);
+		auto temp = m;
+		m = n;
+		n = temp;
+	}
+	auto v = unique_ptr<float>();
+	v.swap(vt);
+	transpose(k, n, v.get());
+	// print concepts
+	auto topTerms = topElementsInTopConcepts(n, k, v.get(), show_top, show_top);
+	auto topDocs = topElementsInTopConcepts(m, k, u.get(), show_top, show_top);
+	printConcepts(show_top, show_top, show_top, topDocs, topTerms, terms, docTitles);
+
 	//corrolated
-	printf("V*S = \n");
-	float VS[n * k];
-	memcpy(VS, V, sizeof(float) * k * n);
-	multiplyByDiagonalMatrix(n, k, VS, S);
-	printRowMajorMatrix(n, k, VS, "VS");
-	printf("=====\n");
+	multiplyByDiagonalMatrix(n, k, v.get(), s.get());
+	rowsNormalized(n, k, v.get());
+	multiplyByDiagonalMatrix(m, k, u.get(), s.get());
+	rowsNormalized(m, k, u.get());
+	while (true) {
+		std::cout << std::endl;
+		std::cout << "Query term: ";
+		char buf[1024];
+		std::cin.getline(buf, 1024);
+		string term(buf);
+		if (term == "!") {
+			break;
+		}
+		auto termIdx = -1;
+		for (auto i = 0; i < numTerms; i++) {
+			if (terms[i] == term) {
+				termIdx = i;
+				break;
+			}
+		}
+		if (termIdx < 0) {
+			std::cout << "Term not exist." << std::endl;
+			continue;
+		}
+		auto termTerm = topsForTerm(n, k, v.get(), n, k, v.get(), termIdx);
+		auto termDoc = topsForTerm(m, k, u.get(), n, k, v.get(), termIdx);
+		
+		printTermRelated(termIdx, show_top, termTerm, termDoc, terms, docTitles);
+	}
 
-	printf("norm(V*S) = \n");
-	float normVS[n * k];
-	memcpy(normVS, VS, sizeof(float) * k * n);
-	rowsNormalized(n, k, normVS);
-	printRowMajorMatrix(n, k, normVS, "normVS");
-	printf("=====\n");
+}
 
-	printf("U*S = \n");
-	float US[m * k];
-	memcpy(US, U, sizeof(float) * k * m);
-	multiplyByDiagonalMatrix(m, k, US, S);
-	printRowMajorMatrix(m, k, US, "US");
-	printf("=====\n");
+int main(int argc, char *argv[]){
+	std::cout << "This is CUDA-DENSE-SMALL LSA demo for EE451 Team7 course project. CUDA-DENSE-LARGE & CUDA-SPARCE-LARGE is on the way. SPARK-DENSE-LARGE is ready else where. SPARK-SPARCE-LARGE is on the way." << std::endl;
 
-	printf("norm(U*S) = \n");
-	float normUS[m * k];
-	memcpy(normUS, US, sizeof(float) * k * m);
-	rowsNormalized(m, k, normUS);
-	printRowMajorMatrix(m, k, normUS, "normUS");
-	printf("=====\n");
+	assert(argc == 2);
+	int numDocs, numTerms;
+	auto docTitles = vector<string>();
+	auto terms = vector<string>();
+	auto doc_term_freq_mat = read(argv[1], numDocs, numTerms, docTitles, terms);
 
-	int lookUpTermIdx = 0;
-	auto termTerm = topTermsForTerm(n, k, normVS, lookUpTermIdx);
-	printTermTerm(lookUpTermIdx, termTerm);
-
+	std::cout << "Read " << numDocs << " docs, " << numTerms << " terms." << std::endl;
+	auto not_0_count = 0;
+	for (auto i = 0; i < numDocs; i++) {
+		for (auto j = 0; j < numTerms; j++) {
+			if (doc_term_freq_mat.get()[i * numTerms + j] != 0) {
+				not_0_count++;
+			}
+		}
+	}
+	std::cout << not_0_count / double(numDocs * numTerms) << " non zero element(s)." << std::endl;
+	
+	auto numConcepts = (numDocs < numTerms ? numDocs : numTerms) / 10;
+	lsa_demo(numDocs, numTerms, doc_term_freq_mat.get(), docTitles, terms, numConcepts);
     return 0;
 }

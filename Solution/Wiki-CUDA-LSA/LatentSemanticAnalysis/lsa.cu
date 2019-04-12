@@ -4,47 +4,25 @@
 #include<cassert>
 #include<algorithm>
 
-
 //TODO: return void
 //TODO: parallelize
-std::vector<std::vector<std::tuple<int, float>>> topTermsInTopConcepts(int rows, int cols, float * matrix_VT, int numConcepts, int numTerms) {
-	assert(numConcepts <= rows && numTerms <= cols);
-	auto topTerms = std::vector<std::vector<std::tuple<int, float>>>();
-	// VT: concept->row, term->col
-	for (int i = 0; i < numConcepts; i++) {
-		auto termWeights = std::vector<std::tuple<int, float>>();
-		for (int j = 0; j < cols; j++) {
-			termWeights.push_back(std::make_tuple(j, matrix_VT[i * cols + j]));//<termIdx, termWeight>
-		}
-		sort(termWeights.begin(), termWeights.end(), [](std::tuple<int, float> a, std::tuple<int, float> b) {return std::get<1>(a) > std::get<1>(b); });//weight desc
-		auto conceptTopTerms = std::vector<std::tuple<int, float>>();
-		for (int j = 0; j < numTerms; j++) {
-			conceptTopTerms.push_back(termWeights[j]);
-		}
-		topTerms.push_back(conceptTopTerms);
-	}
-	return topTerms;
-}
-
-//TODO: return void
-//TODO: parallelize
-std::vector<std::vector<std::tuple<int, float>>> topDocsInTopConcepts(int rows, int cols, float * matrix_U, int numConcepts, int numDocs) {
-	assert(numConcepts <= cols && numDocs <= rows);
-	auto topDocs = std::vector<std::vector<std::tuple<int, float>>>();
+std::vector<std::vector<std::tuple<int, float>>> topElementsInTopConcepts(int rows, int cols, float * matrix, int numConcepts, int numElement) {
+	assert(numConcepts <= cols && numElement <= rows);
+	auto topElements = std::vector<std::vector<std::tuple<int, float>>>();
 	//U: doc->row, concept->col
 	for (int j = 0; j < numConcepts; j++) {
-		auto docWeights = std::vector<std::tuple<int, float>>();
+		auto elementWeights = std::vector<std::tuple<int, float>>();
 		for (int i = 0; i < rows; i++) {
-			docWeights.push_back(std::make_tuple(i, matrix_U[i * cols + j]));
+			elementWeights.push_back(std::make_tuple(i, matrix[i * cols + j]));
 		}
-		sort(docWeights.begin(), docWeights.end(), [](std::tuple<int, float> a, std::tuple<int, float> b) {return std::get<1>(a) > std::get<1>(b); });//weight desc
-		auto conceptTopDocs = std::vector<std::tuple<int, float>>();
-		for (int i = 0; i < numDocs; i++) {
-			conceptTopDocs.push_back(docWeights[i]);
+		sort(elementWeights.begin(), elementWeights.end(), [](std::tuple<int, float> a, std::tuple<int, float> b) {return std::get<1>(a) > std::get<1>(b); });//weight desc
+		auto conceptTopElements = std::vector<std::tuple<int, float>>();
+		for (int i = 0; i < numElement; i++) {
+			conceptTopElements.push_back(elementWeights[i]);
 		}
-		topDocs.push_back(conceptTopDocs);
+		topElements.push_back(conceptTopElements);
 	}
-	return topDocs;
+	return topElements;
 }
 
 
@@ -63,17 +41,18 @@ void rowsNormalized(int rows, int cols, float * matrix) {
 
 //TODO: return void
 //TODO: parallelize
-std::vector<std::tuple<int, float>> topTermsForTerm(int rows, int cols, float * normVS, int termIdx) {
-	float * rowVec = new float[cols];
-	memcpy(rowVec, normVS + termIdx * cols, sizeof(float) * cols);
+std::vector<std::tuple<int, float>> topsForTerm(int rows, int cols, float * normXS, int vRows, int vCols, float * normVS, int termIdx) {
+	assert(cols == vCols);
+	float * rowVec = new float[vCols];
+	memcpy(rowVec, normVS + termIdx * vCols, sizeof(float) * vCols);
 	float * resultVec = new float[rows];
-	multiply(rows, cols, 1, normVS, rowVec, resultVec);
-	auto termScores = std::vector<std::tuple<int, float>>();
+	multiply(rows, cols, 1, normXS, rowVec, resultVec);
+	auto docScores = std::vector<std::tuple<int, float>>();
 	for (int i = 0; i < rows; i++) {
-		termScores.push_back(std::make_tuple(i, resultVec[i]));
+		docScores.push_back(std::make_tuple(i, resultVec[i]));
 	}
-	sort(termScores.begin(), termScores.end(), [](std::tuple<int, float> a, std::tuple<int, float> b) {return std::get<1>(a) > std::get<1>(b); });//weight desc
+	sort(docScores.begin(), docScores.end(), [](std::tuple<int, float> a, std::tuple<int, float> b) {return std::get<1>(a) > std::get<1>(b); });//weight desc
 	delete[] resultVec;
 	delete[] rowVec;
-	return termScores;
+	return docScores;
 }

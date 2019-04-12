@@ -5,12 +5,10 @@
 #include<vector>
 #include<tuple>
 
-std::vector<std::vector<std::tuple<int, float>>> topTermsInTopConcepts(int rows, int cols, float * matrix_VT, int numConcepts, int numTerms);
-
-std::vector<std::vector<std::tuple<int, float>>> topDocsInTopConcepts(int rows, int cols, float * matrix_U, int numConcepts, int numDocs);
+std::vector<std::vector<std::tuple<int, float>>> topElementsInTopConcepts(int rows, int cols, float * matrix_U, int numConcepts, int numDocs);
 
 void rowsNormalized(int rows, int cols, float * matrix);
 
-std::vector<std::tuple<int, float>> topTermsForTerm(int rows, int cols, float * normVS, int termIdx);
+std::vector<std::tuple<int, float>> topsForTerm(int rows, int cols, float * normXS, int vRows, int vCols, float * normVS, int termIdx);
 
 #endif // _INC_LSA

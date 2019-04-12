@@ -88,6 +88,7 @@
   <ItemGroup>
     <CudaCompile Include="kernel.cu" />
     <CudaCompile Include="lsa.cu" />
+    <CudaCompile Include="routine.cu" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lsa.cuh" />

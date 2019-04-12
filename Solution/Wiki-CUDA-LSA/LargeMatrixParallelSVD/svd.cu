@@ -5,6 +5,9 @@
 #include <cusolverDn.h>
 
 void transpose_device(int rows, int cols, float * d_Matrix) {
+	if (rows == 1 || cols == 1) {
+		return;
+	}
 	cudaError_t cudaStat = cudaSuccess;
 	float * d_Result = NULL;
 	cudaStat = cudaMalloc((void**)&d_Result, sizeof(float) * rows * cols);
@@ -23,6 +26,9 @@ void transpose_device(int rows, int cols, float * d_Matrix) {
 }
 
 void transpose(int rows, int cols, float * matrix) {
+	if (rows == 1 || cols == 1) {
+		return;
+	}
 	cudaError_t cudaStat = cudaSuccess;
 	float * d_Matrix = NULL;
 	cudaStat = cudaMalloc((void**)&d_Matrix, sizeof(float) * rows * cols);

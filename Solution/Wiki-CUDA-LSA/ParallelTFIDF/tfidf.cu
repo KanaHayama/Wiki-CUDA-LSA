@@ -13,7 +13,7 @@ void tfidf(int rows, int cols, float * matrix) {
 				includeDocs++;
 			}
 		}
-		float termIdf = numDocs / (log10(includeDocs) + 1);
+		float termIdf = log10(numDocs / float(includeDocs + 1));
 		for (int docIdx = 0; docIdx < numDocs; docIdx++) {
 			matrix[docIdx * cols + termIdx] *= termIdf;
 		}

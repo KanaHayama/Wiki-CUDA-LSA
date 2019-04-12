@@ -56,20 +56,19 @@ def prepare_corpus(docs_clean):
 	return dictionary, doc_term_freq_matrix
 
 def print_terms(dictionary, file=sys.stdout):
-	print("Terms:", file=file)
+	# print("Terms:", file=file)
 	for id, term in dictionary.iteritems():
-		print("{}:{}".format(id, term), file=file)
+		print(term, file=file)
 
 def print_doc_titles(titles, file=sys.stdout):
-	print("Doc titles:", file=file)
+	# print("Doc titles:", file=file)
 	for id, title in titles:
-		print("{}:{}".format(id, title), file=file)
+		print(title, file=file)
 
 def print_doc_term_freq_matrix(doc_term_freq_matrix, file=sys.stdout):
-	print("Doc term freq matrix:", file=file)
+	# print("Doc term freq matrix:", file=file)
 	for doc_freq in doc_term_freq_matrix:
 		print(" ".join(str(freq) for freq in doc_freq), file=file)
-
 
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser(description = "For USC EE451 2019 spring home work.")
@@ -98,7 +97,7 @@ if __name__ == "__main__":
 	docs_clean = [preprocess_data(pair[1]) for pair in title_doc_pairs]
 	term_dict, doc_term_freq_matrix = prepare_corpus(docs_clean)
 	title_dict = [(i, title_doc_pairs[i][0]) for i in range(len(title_doc_pairs))]
-	print("{} docs, {} terms\n".format(len(docs_clean), len(term_dict)), file=args.output)
-	print_terms(term_dict, args.output)
+	print("{} {}".format(len(docs_clean), len(term_dict)), file=args.output)
 	print_doc_titles(title_dict, args.output)
+	print_terms(term_dict, args.output)
 	print_doc_term_freq_matrix(doc_term_freq_matrix, args.output)
