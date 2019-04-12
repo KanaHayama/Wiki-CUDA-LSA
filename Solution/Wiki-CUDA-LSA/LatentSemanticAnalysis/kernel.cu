@@ -7,6 +7,7 @@
 #include<string>
 #include<cassert>
 #include<algorithm>
+#include<memory>
 #include"lsa.cuh"
 
 using std::vector;
@@ -34,7 +35,7 @@ void printMatrix(const char* name, int m, int n, const float*A) {
 }
 
 shared_ptr<float> read(const string filename, int & numDocs, int & numTerms, vector<string> & docTitles, vector<string> & terms) {
-	auto f = std::ifstream(filename);
+	std::ifstream f(filename);
 	assert(f.is_open());
 	f >> numDocs >> numTerms;
 	
