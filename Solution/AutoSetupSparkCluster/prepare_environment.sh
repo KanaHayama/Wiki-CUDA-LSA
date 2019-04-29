@@ -31,6 +31,9 @@ if [ ! -d "spark" ];then
 else
 	echo "Spark exists"
 fi
+if [ ! -f "spark/conf/log4j.properties" ]; then
+	cp log4j.properties spark/conf/log4j.properties
+fi
 SPARK_HOME=$work_dir/spark/
 export SPARK_HOME
 echo "Spark home set to $SPARK_HOME"
@@ -78,7 +81,7 @@ fi
 # install Mahout
 cd $work_dir
 if [ ! -d "mahout" ]; then
-	if [ ! -f "mahout-0.14.0-source-release.zip"]; then 
+	if [ ! -f "mahout-0.14.0-source-release.zip" ]; then 
 		wget http://www.apache.org/dist/mahout/0.14.0/mahout-0.14.0-source-release.zip
 	fi
 	unzip mahout-0.14.0-source-release.zip

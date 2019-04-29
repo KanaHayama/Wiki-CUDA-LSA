@@ -9,6 +9,9 @@ allocate_time="23:59:59"
 allocate_cpu_mem=$SLURM_MEM_PER_CPU
 allocate_core=$SLURM_CPUS_PER_TASK
 flag_filename="spark_cluster_running"
+master_host=$(hostname -f)
+master_port=7077
+master_url="spark://$master_host:$master_port"
 # job_id=$(env  | grep SLURM_JOBID)
 # master_ip=$(ifconfig | grep -E -o "inet (10\.[0-9\.]+)" | grep -E -o "[0-9\.]+")
 
@@ -20,15 +23,8 @@ current_dir=$(pwd)
 cd $work_dir/spark/sbin
 . "./stop-master.sh"
 rm -f ../logs/*
-log_file=$(. "./start-master.sh" | grep -E -o "/.*out")
-master_url=""
-while [ "$master_url" == "" ]; do
-	sleep 3
-	master_url=$(cat $log_file | grep -E -o "spark:.*$")
-	echo "Check master state"
-done
+./start-master.sh --host $master_host --port $master_port
 echo "Master URL: $master_url"
-
 
 # start slaves
 cd $work_dir
@@ -45,7 +41,7 @@ done
 
 # check
 num_log=1
-while [ $num_log -ne $num_worker ]; do
+while [ $num_log -ne $(expr $num_worker + 1) ]; do
 	sleep 10
 	num_log=$(ls -l $work_dir/spark/logs |grep "^-"|wc -l)
 	echo "Check worker state: $(expr $num_log - 1) worker(s) are ready"
@@ -55,9 +51,7 @@ done
 echo "Setup Spark cluster done!"
 
 # do computation here
-cd $work_dir
-# ./prepare_environment.sh
-# echo "Environment: $HADOOP_HOME, $SPARK_HOME, $MAHOUT_HOME, $SCALA_HOME"
+./master_work.sh $master_url $(expr $num_worker + 1) $allocate_core $(expr $allocate_core \* $allocate_cpu_mem)
 
 # stop workers
 cd $work_dir
