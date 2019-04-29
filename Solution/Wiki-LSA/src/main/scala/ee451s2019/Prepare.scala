@@ -9,8 +9,8 @@ object Prepare {
 	def main(args: Array[String])= {
 		// args
 		val filename = args(0)
-		val numConcepts = if (args.length > 1) args(0).toInt else 10000
-		val numTerms = if (args.length > 2) args(1).toInt else 20000
+		val numConcepts = if (args.length > 1) args(1).toInt else 10000
+		val numTerms = if (args.length > 2) args(2).toInt else 20000
 
 		// init
 		val sparkSession = SparkSession.builder().config("spark.serializer", classOf[KryoSerializer].getName).getOrCreate() // Use KryoSerializer rather than default Java serializer for good performance
