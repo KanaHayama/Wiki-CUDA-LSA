@@ -4,12 +4,13 @@
 # init
 work_dir="/staging/xq/zongjian/"
 slave_job_name_prefix="spark-worker-"
-num_worker=64
+num_worker=16
 allocate_time="23:59:59"
 allocate_cpu_mem=$SLURM_MEM_PER_CPU
 allocate_core=$SLURM_CPUS_PER_TASK
-job_id=$(env  | grep SLURM_JOBID)
-master_ip=$(ifconfig | grep -E -o "inet (10\.[0-9\.]+)" | grep -E -o "[0-9\.]+")
+flag_filename="spark_cluster_running"
+# job_id=$(env  | grep SLURM_JOBID)
+# master_ip=$(ifconfig | grep -E -o "inet (10\.[0-9\.]+)" | grep -E -o "[0-9\.]+")
 
 # status
 echo "Summary: $num_worker workers, each worker has $SLURM_CPUS_PER_TASK cpus, each worker has $allocate_cpu_mem M mem"
@@ -31,6 +32,7 @@ echo "Master URL: $master_url"
 
 # start slaves
 cd $work_dir
+touch $flag_filename
 if [ ! -d "logs" ]; then
 	mkdir logs
 fi
@@ -43,7 +45,7 @@ done
 
 # check
 num_log=1
-while [ $num_log -ne $SLURM_NNODES ]; do
+while [ $num_log -ne $num_worker ]; do
 	sleep 10
 	num_log=$(ls -l $work_dir/spark/logs |grep "^-"|wc -l)
 	echo "Check worker state: $(expr $num_log - 1) worker(s) are ready"
@@ -58,11 +60,8 @@ cd $work_dir
 # echo "Environment: $HADOOP_HOME, $SPARK_HOME, $MAHOUT_HOME, $SCALA_HOME"
 
 # stop workers
+cd $work_dir
+rm -f $flag_filename
 cd $current_dir
-squeue -v | grep spark
-for i in $(seq 1 $num_worker) ; do
-	echo "Shutdown worker $i"
-	scancel --name=$slave_job_name_prefix$i
-done
-echo "Shutdown Spark cluster done!"
-squeue -v | grep spark
+./master_stop.sh $slave_job_name_prefix $num_worker
+
