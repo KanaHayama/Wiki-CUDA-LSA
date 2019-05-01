@@ -6,10 +6,6 @@ check hard coded parameters
 
 run prepare_environment.sh
 
-run allocate_node.sh
-
-wait for a node assigned
-
 run master_start.sh
 
 run master_submit.sh

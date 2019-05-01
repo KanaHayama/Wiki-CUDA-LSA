@@ -2,13 +2,14 @@
 ## manually run in master node
 
 # init
+num_worker=8
+allocate_core=8
+allocate_cpu_mem="4g"
+allocate_time="23:59:59"
+allocate_time="1:00:00"
+
 work_dir="/staging/xq/zongjian/"
 slave_job_name_prefix="spark-worker-"
-num_worker=8
-allocate_time="23:59:59"
-allocate_cpu_mem=$SLURM_MEM_PER_CPU
-allocate_core=$SLURM_CPUS_PER_TASK
-allocate_node_mem=$(expr $allocate_core \* $allocate_cpu_mem)
 flag_filename="spark_cluster_running"
 master_host=$(hostname -f)
 master_port=7077
@@ -52,15 +53,19 @@ echo "Waiting workers to setup."
 sleep 20
 
 # check connection
-if [ $(cat $spark_dir/logs/* | grep -E "WARN Worker" | wc -l) -ne 0 ]; then
-	echo "Some worker(s) failed"
-else
-	
-fi
+fail_count=0
+for log in $spark_dir/logs/*
+do
+	if [ $(cat $log | grep -E "WARN Worker" | wc -l) -ne 0 ]; then
+		echo "$log failed"
+		fail_count=$(expr $fail_count + 1)
+	fi
+done
+echo "$fail_count/$num_worker workers are failed to connect to the master."
 
 # finish
 squeue -v | grep spark
 echo "Setup Spark cluster done."
-echo "Cluster summary: $num_worker workers, each worker has ${allocate_core} CPUs, each CPU has ${allocate_cpu_mem}M mem, worker total ${allocate_node_mem}M mem."
+echo "Cluster summary: $num_worker workers, each worker has ${allocate_core} CPUs, each CPU has ${allocate_cpu_mem} mem."
 echo "Spark master URL is $master_url"
 echo "Use lynx $master_webui_url to browse cluster info."
