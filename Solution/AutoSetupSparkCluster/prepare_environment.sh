@@ -118,6 +118,7 @@ if [ ! -d "viennacl-dev" ]; then
 	cmake ..
 	make
 	# head files in ../viennacl
+	# Add libviennacl.so to LD_LIBRARY_PATH
 else
 	echo "Viennacl exists"
 fi

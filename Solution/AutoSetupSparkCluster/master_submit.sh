@@ -20,7 +20,7 @@ num_concepts=100
 num_terms=20000
 
 work_dir="/staging/xq/zongjian/"
-class_name="ee451s2019.Prepare"
+
 jar_filename="mllib_ver.jar"
 output_filename="spark-output.log"
 
@@ -36,5 +36,7 @@ echo "Reduce to $num_concepts concepts, and $num_terms terms"
 echo "Output record to $output_filename"
 
 # compute
-echo "Environment: $HADOOP_HOME, $SPARK_HOME, $MAHOUT_HOME, $SCALA_HOME"
+class_name="ee451s2019.CPU"
+$work_dir/spark/bin/spark-submit --master $master_url --executor-cores $cores_per_worker --executor-memory ${mem_per_worker} --class $class_name $jar_filename $wiki_filename $num_concepts $num_terms | tee $output_filename
+class_name="ee451s2019.GPU"
 $work_dir/spark/bin/spark-submit --master $master_url --executor-cores $cores_per_worker --executor-memory ${mem_per_worker} --class $class_name $jar_filename $wiki_filename $num_concepts $num_terms | tee $output_filename

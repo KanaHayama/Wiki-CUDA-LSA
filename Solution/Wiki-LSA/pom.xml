@@ -417,7 +417,7 @@
         <configuration>
           <archive>
             <manifest>
-              <mainClass>ee451s2019.Prepare</mainClass>
+              <mainClass>ee451s2019.CPU</mainClass>
             </manifest>
           </archive>
         </configuration>
