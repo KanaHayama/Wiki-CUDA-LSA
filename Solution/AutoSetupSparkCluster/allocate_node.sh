@@ -3,7 +3,7 @@
 # init
 work_dir="/staging/xq/zongjian/"
 allocate_time="23:59:59"
-allocate_core=16
+allocate_core=8
 allocate_cpu_mem="4g"
 master_job_name="spark-master"
 
