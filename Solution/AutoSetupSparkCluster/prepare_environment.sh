@@ -124,7 +124,7 @@ else
 fi
 
 # build CUDA Mahout
-
+# copy core_ & spark_ to CLASSPATH
 
 # download repo
 cd $work_dir
@@ -137,6 +137,6 @@ git pull https://github.com/KanaHayama/Wiki-CUDA-LSA.git
 # compile jars
 rm -f $work_dir/mllib_ver.jar
 cd $work_dir/Wiki-CUDA-LSA/Solution/Wiki-LSA
-mvn clean package
+mvn clean package -P special
 ln -s $work_dir/Wiki-CUDA-LSA/Solution/Wiki-LSA/target/Wiki-LSA-1.0.0-jar-with-dependencies.jar $work_dir/mllib_ver.jar
 

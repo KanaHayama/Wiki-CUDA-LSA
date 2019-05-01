@@ -25,6 +25,27 @@
     <mahout.version>0.14.0</mahout.version>
   </properties>
 
+  <profiles>
+    <profile>
+      <id>default</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <properties>
+        <mahout.scope>compile</mahout.scope>
+      </properties>
+    </profile>
+    <profile>
+      <id>special</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <properties>
+        <mahout.scope>provided</mahout.scope>
+      </properties>
+    </profile>
+  </profiles>
+
   <url>https://github.com/KanaHayama/Wiki-CUDA-LSA</url>
   <inceptionYear>2019</inceptionYear>
   <developers>
@@ -223,11 +244,13 @@
       <groupId>org.apache.mahout</groupId>
       <artifactId>core_${scala.minor.version}</artifactId>
       <version>${mahout.version}</version>
+      <scope>${mahout.scope}</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.mahout</groupId>
       <artifactId>spark_${scala.minor.version}</artifactId>
       <version>${mahout.version}</version>
+      <scope>${mahout.scope}</scope>
     </dependency>
   </dependencies>
 
