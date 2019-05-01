@@ -15,7 +15,7 @@ if [ $mem_per_worker == "" ]; then
 fi
 
 wiki_filename="simplewiki-20190301-pages-articles-multistream.xml"
-wiki_filename="enwiki-20190301-pages-articles-multistream.xml"
+# wiki_filename="enwiki-20190301-pages-articles-multistream.xml"
 num_concepts=100
 num_terms=20000
 

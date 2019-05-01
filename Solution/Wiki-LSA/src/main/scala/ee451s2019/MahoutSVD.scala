@@ -3,7 +3,7 @@ package ee451s2019
 import org.apache.spark.ml.linalg.{Vector => MLVector}
 import org.apache.spark.mllib.linalg.Vectors
 import org.apache.mahout.math.Vector
-import org.apache.mahout.math.drm._
+import org.apache.mahout.math.drm.DrmLike
 import org.apache.mahout.math.decompositions.DSSVD
 import org.apache.mahout.sparkbindings.drmWrapMLLibVector
 import org.apache.spark.sql.SparkSession

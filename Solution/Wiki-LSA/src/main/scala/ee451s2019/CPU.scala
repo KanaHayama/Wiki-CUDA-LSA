@@ -40,10 +40,5 @@ object CPU {
 
 		queryEngine.printTopDocsForTermQuery(Seq("factorization", "decomposition"))
 
-		// Mahout SVD
-		timing.restart()
-		val _ = MahoutSVD.get(sparkSession, documentTermFrequencyMatrix, numConcepts)
-		timing.stop("Mahout SVD")
-
 	}
 }

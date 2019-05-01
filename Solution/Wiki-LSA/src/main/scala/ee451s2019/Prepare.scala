@@ -31,14 +31,16 @@ object Prepare {
 		timing.restart()
 		val stopWords = scala.io.Source.fromInputStream(getClass.getResourceAsStream(STOP_WORD_FILENAME)).getLines().toSet
 		val documentTermMatrix = DocumentTerm.get(sparkSession, documentContentMatrix, stopWords)
+		documentContentMatrix.cache() //cache for later use
+		documentContentMatrix.count() //count is a action, so do the action actually, to get exec time
 		timing.stop("Doc-terms")
 
 		// TF/IDF matrix
 		timing.restart()
 		val documentTermFrequencyMatrix = DocumentTermFrequency.get(sparkSession, documentTermMatrix, Some(numTerms))
 		documentTermFrequencyMatrix.idfMatrix.cache() //cache for later use
-		documentTermFrequencyMatrix.idfMatrix.count() //count is a action, so do the action actually
-		timing.stop("TD-IDF")
+		documentTermFrequencyMatrix.idfMatrix.count() //count is a action, so do the action actually, to get exec time
+		timing.stop("TF-IDF")
 
 		(documentTermFrequencyMatrix, sparkSession, numConcepts, numShowConcepts, numShowDocs, numShowTerms)
 	}
