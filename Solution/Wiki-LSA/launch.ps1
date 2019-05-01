@@ -4,7 +4,7 @@ param (
 	[string]$jar_filename = "target/Wiki-LSA-1.0.0-jar-with-dependencies.jar",
 	[string]$class_name = "ee451s2019.Prepare",
 	[string]$wiki_filename = "D:/TEST/simplewiki-20190301-pages-articles-multistream.xml",
-	[int]$num_concepts = 10000,
+	[int]$num_concepts = 100,
 	[int]$num_terms = 20000,
 	[int]$debug_port = 5005,
 	[string]$debug_wait_debugger = "y"

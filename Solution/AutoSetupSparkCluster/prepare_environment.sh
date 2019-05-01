@@ -20,14 +20,14 @@ echo "Hadoop home set to $HADOOP_HOME"
 PATH=$PATH:$HADOOP_HOME/bin
 export PATH
 
-# install Spark
+# install Spark (spark 2.4 and later is built using scala 2.12, Mahout now do not support scala 2.12)
 cd $work_dir
 if [ ! -d "spark" ];then
-	if [ ! -f "spark-2.4.2-bin-hadoop2.7.tgz" ]; then
-		wget https://www-eu.apache.org/dist/spark/spark-2.4.2/spark-2.4.2-bin-hadoop2.7.tgz
+	if [ ! -f "spark-2.3.3-bin-hadoop2.7.tgz" ]; then
+		wget https://www-eu.apache.org/dist/spark/spark-2.3.3/spark-2.3.3-bin-hadoop2.7.tgz
 	fi
-	tar -xzf spark-2.4.2-bin-hadoop2.7.tgz
-	mv spark-2.4.2-bin-hadoop2.7 spark
+	tar -xzf spark-2.3.3-bin-hadoop2.7.tgz
+	mv spark-2.3.3-bin-hadoop2.7 spark
 else
 	echo "Spark exists"
 fi
@@ -40,14 +40,14 @@ echo "Spark home set to $SPARK_HOME"
 PATH=$PATH:$SPARK_HOME/bin
 export PATH
 
-# install Scala
+# install Scala (Mahout not support latest version, now only 2.11)
 cd $work_dir
 if [ ! -d "scala" ];then
-	if [ ! -f "scala-2.12.8.tgz" ]; then
-		wget https://downloads.lightbend.com/scala/2.12.8/scala-2.12.8.tgz
+	if [ ! -f "scala-2.11.12.tgz" ]; then
+		wget https://downloads.lightbend.com/scala/2.11.12/scala-2.11.12.tgz
 	fi
-	tar -xzf scala-2.12.8.tgz
-	mv scala-2.12.8 scala
+	tar -xzf scala-2.11.12.tgz
+	mv scala-2.11.12 scala
 else
 	echo "Spark exists"
 fi
@@ -105,6 +105,25 @@ if [ ! -f "enwiki-20190301-pages-articles-multistream.xml" ]; then
 	wget https://dumps.wikimedia.org/enwiki/20190301/enwiki-20190301-pages-articles-multistream.xml.bz2
 	bunzip2 enwiki-20190301-pages-articles-multistream.xml.bz2
 fi
+
+# download & build ViennaCL
+cd $work_dir
+if [ ! -d "viennacl-dev" ]; then
+	git clone https://github.com/viennacl/viennacl-dev.git
+	cd viennacl-dev
+	mkdir build
+	cd build
+	# ENABEL_CUDA=yes, ENABEL_OPENCL=no, -arch=sm_30
+	# ccmake .. 
+	cmake ..
+	make
+	# head files in ../viennacl
+else
+	echo "Viennacl exists"
+fi
+
+# build CUDA Mahout
+
 
 # download repo
 cd $work_dir

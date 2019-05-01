@@ -10,7 +10,6 @@ object MLlibSVD extends SVD {
 		val rdd = documentTermFrequencyMatrix.idfMatrix.select(DocumentTermFrequencyMatrix.TERM_IDF_COL_NAME).rdd.map { row =>
 			Vectors.fromML(row.getAs[Vector](DocumentTermFrequencyMatrix.TERM_IDF_COL_NAME))
 		}
-		rdd.cache()
 		val matrix = new RowMatrix(rdd)
 		matrix.computeSVD(k, computeU = true)
 	}

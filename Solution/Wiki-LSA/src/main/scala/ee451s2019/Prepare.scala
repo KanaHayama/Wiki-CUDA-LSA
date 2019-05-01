@@ -14,9 +14,9 @@ object Prepare {
 
 		// init
 		val sparkSession = SparkSession.builder().config("spark.serializer", classOf[KryoSerializer].getName).getOrCreate() // Use KryoSerializer rather than default Java serializer for good performance
-		val numShowConcepts = 10
-		val numShowDocs = 10
-		val numShowTerms = 10
+		val numShowConcepts = 5
+		val numShowDocs = 5
+		val numShowTerms = 5
 		assert(numConcepts >= numShowConcepts)
 		assert(numTerms >= numShowTerms)
 		val timing = new Timing()
@@ -36,12 +36,14 @@ object Prepare {
 		// TF/IDF matrix
 		timing.restart()
 		val documentTermFrequencyMatrix = DocumentTermFrequency.get(sparkSession, documentTermMatrix, Some(numTerms))
+		documentTermFrequencyMatrix.idfMatrix.cache() //cache for later use
+		documentTermFrequencyMatrix.idfMatrix.count() //count is a action, so do the action actually
 		timing.stop("TD-IDF")
 
-		// SVD
+		// MLlib SVD
 		timing.restart()
 		val svd = MLlibSVD.get(sparkSession, documentTermFrequencyMatrix, numConcepts)
-		timing.stop("SVD")
+		timing.stop("MLlib SVD")
 
 		// print static results
 		timing.restart()
@@ -72,6 +74,11 @@ object Prepare {
 		queryEngine.printTopDocsForDoc("Radiohead")
 
 		queryEngine.printTopDocsForTermQuery(Seq("factorization", "decomposition"))
+
+		// Mahout SVD
+		timing.restart()
+		val _ = MahoutSVD.get(sparkSession, documentTermFrequencyMatrix, numConcepts)
+		timing.stop("Mahout SVD")
 
 	}
 }
