@@ -14,9 +14,9 @@ object Prepare {
 
 		// init
 		val sparkSession = SparkSession.builder().config("spark.serializer", classOf[KryoSerializer].getName).getOrCreate() // Use KryoSerializer rather than default Java serializer for good performance
-		val numShowConcepts = 5
-		val numShowDocs = 5
-		val numShowTerms = 5
+		val numShowConcepts = 10
+		val numShowDocs = 10
+		val numShowTerms = 10
 		assert(numConcepts >= numShowConcepts)
 		assert(numTerms >= numShowTerms)
 		val timing = new Timing()

@@ -123,8 +123,10 @@ else
 	echo "Viennacl exists"
 fi
 
-# build CUDA Mahout
-# copy core_ & spark_ to CLASSPATH
+# build OpenCL/CUDA Mahout
+# modify "/usr/include" in Context.scala (due to no sudo permision)
+# mvn clean install -Pviennacl -DskipTests
+# add mahout/lib to CLASSPATH
 
 # download repo
 cd $work_dir
