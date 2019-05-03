@@ -1,20 +1,40 @@
-login in HPC
++Login in HPC
 
-all sh scripts execute permission
+
++Adding all shell scripts execute permission
+
 chmod +x *.sh
 
-check hard coded parameters
-parameters of cluster in master_start.sh
+
++Check hard coded parameters
+
+parameters of Spark cluster in master_start.sh
+
 parameters of LSA in master_submit.sh
+
+
++Setup libraries and dataset
 
 run prepare_environment.sh
 
+
++Start Spark cluster using standalone cluster manager
+
 run master_start.sh
+
+
++Submit LSA job
 
 run master_submit.sh {num-cores-per-worker} {num-total-mem-per-worker}
 
-wait task finish
+
++Wait task finish
+
+
++Stop Spark cluster
 
 rm -f spark_cluster_running
+
 OR
+
 run master_stop.sh {num-of-workers}
