@@ -22,23 +22,23 @@ object CPU {
 		}
 		timing.stop("Find Top")
 
-		// save
+		// save matrices
 		//TODO:
 
 		// sample queries
-		val queryEngine = new LSAQueryEngine(svd, documentTermFrequencyMatrix.docIds, documentTermFrequencyMatrix.termIds, documentTermFrequencyMatrix.idfScale)
-		queryEngine.printTopTermsForTerm("algorithm")
-		queryEngine.printTopTermsForTerm("radiohead")
-		queryEngine.printTopTermsForTerm("tarantino")
+		val engine = new LSAQueryEngine(svd, documentTermFrequencyMatrix.docIds, documentTermFrequencyMatrix.termIds, documentTermFrequencyMatrix.idfScale)
+		engine.printTopTermsForTerm("algorithm")
+		engine.printTopTermsForTerm("radiohead")
+		engine.printTopTermsForTerm("tarantino")
 
-		queryEngine.printTopDocsForTerm("fir")
-		queryEngine.printTopDocsForTerm("graph")
+		engine.printTopDocsForTerm("fir")
+		engine.printTopDocsForTerm("graph")
 
-		queryEngine.printTopDocsForDoc("Romania")
-		queryEngine.printTopDocsForDoc("Brad Pitt")
-		queryEngine.printTopDocsForDoc("Radiohead")
+		engine.printTopDocsForDoc("Romania")
+		engine.printTopDocsForDoc("Brad Pitt")
+		engine.printTopDocsForDoc("Radiohead")
 
-		queryEngine.printTopDocsForTermQuery(Seq("factorization", "decomposition"))
+		engine.printTopDocsForTermQuery(Seq("factorization", "decomposition"))
 
 		// Mahout SVD
 		println("Try Mahout")

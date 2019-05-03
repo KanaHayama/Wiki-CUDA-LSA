@@ -18,4 +18,3 @@ wait task finish
 rm -f spark_cluster_running
 OR
 run master_stop.sh {num-of-workers}
-

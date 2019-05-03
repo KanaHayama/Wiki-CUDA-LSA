@@ -8,6 +8,13 @@ import org.apache.spark.mllib.linalg.distributed.RowMatrix
 
 import scala.collection.Map
 
+/**
+  * LSA Query Engine. This class is based on the code of Book "Advanced Analytics with Spark, 2nd Edition" by Sandy Ryza, Uri Laserson, Sean Owen, and Josh Wills
+  * @param svd
+  * @param docIds
+  * @param termIds
+  * @param termIdfs
+  */
 class LSAQueryEngine(val svd: SingularValueDecomposition[RowMatrix, Matrix], val docIds: Map[Long, String], val termIds: Array[String], val termIdfs: Array[Double]) {
 
 	val VS: BDenseMatrix[Double] = multiplyByDiagonalMatrix(svd.V, svd.s)
@@ -22,16 +29,16 @@ class LSAQueryEngine(val svd: SingularValueDecomposition[RowMatrix, Matrix], val
 	  * Finds the product of a dense matrix and a diagonal matrix represented by a vector.
 	  * Breeze doesn't support efficient diagonal representations, so multiply manually.
 	  */
-	def multiplyByDiagonalMatrix(mat: Matrix, diag: MLLibVector): BDenseMatrix[Double] = {
+	private def multiplyByDiagonalMatrix(mat: Matrix, diag: MLLibVector): BDenseMatrix[Double] = {
 		val sArr = diag.toArray
 		new BDenseMatrix[Double](mat.numRows, mat.numCols, mat.toArray)
-			.mapPairs { case ((r, c), v) => v * sArr(c) }
+			.mapPairs { case ((row, col), v) => v * sArr(col) }
 	}
 
 	/**
 	  * Finds the product of a distributed matrix and a diagonal matrix represented by a vector.
 	  */
-	def multiplyByDiagonalRowMatrix(mat: RowMatrix, diag: MLLibVector): RowMatrix = {
+	private def multiplyByDiagonalRowMatrix(mat: RowMatrix, diag: MLLibVector): RowMatrix = {
 		val sArr = diag.toArray
 		new RowMatrix(mat.rows.map { vec =>
 			val vecArr = vec.toArray
@@ -43,7 +50,7 @@ class LSAQueryEngine(val svd: SingularValueDecomposition[RowMatrix, Matrix], val
 	/**
 	  * Returns a matrix where each row is divided by its length.
 	  */
-	def rowsNormalized(mat: BDenseMatrix[Double]): BDenseMatrix[Double] = {
+	private def rowsNormalized(mat: BDenseMatrix[Double]): BDenseMatrix[Double] = {
 		val newMat = new BDenseMatrix[Double](mat.rows, mat.cols)
 		for (r <- 0 until mat.rows) {
 			val length = math.sqrt((0 until mat.cols).map(c => mat(r, c) * mat(r, c)).sum)
@@ -55,7 +62,7 @@ class LSAQueryEngine(val svd: SingularValueDecomposition[RowMatrix, Matrix], val
 	/**
 	  * Returns a distributed matrix where each row is divided by its length.
 	  */
-	def distributedRowsNormalized(mat: RowMatrix): RowMatrix = {
+	private def distributedRowsNormalized(mat: RowMatrix): RowMatrix = {
 		new RowMatrix(mat.rows.map { vec =>
 			val array = vec.toArray
 			val length = math.sqrt(array.map(x => x * x).sum)

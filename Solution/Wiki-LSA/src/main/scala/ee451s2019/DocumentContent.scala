@@ -13,7 +13,7 @@ object DocumentContent {
 		!page.isEmpty && page.isArticle && !page.isRedirect && !page.isDisambiguation && !page.getTitle.contains("(disambiguation)")
 	}
 
-	private def parseArticleXML(xml: String): Option[(String, String)] = { // TODO: make my own version of WikipediaPage & EnglishWikipediaPage base on its source code
+	private def parseArticleXML(xml: String): Option[(String, String)] = { // TODO: Library edu.umd.cloud9 is abandoned. Make my own version of WikipediaPage & EnglishWikipediaPage base on its source code
 		val page = new EnglishWikipediaPage()
 		val hackedPageXml = xml.replaceFirst("<text xml:space=\"preserve\" bytes=\"\\d+\">", "<text xml:space=\"preserve\">")
 		WikipediaPage.readPage(page, hackedPageXml)
@@ -24,7 +24,7 @@ object DocumentContent {
 		}
 	}
 
-	def get(sparkSession: SparkSession, xmlFilename: String) : Dataset[(String, String)] = { // why Dataset? // TODO: repalce XMLInputFormat
+	def get(sparkSession: SparkSession, xmlFilename: String) : Dataset[(String, String)] = { // why Dataset? // TODO: replace XMLInputFormat
 		import sparkSession.implicits._
 		val hadoopConfig = new Configuration()
 		hadoopConfig.set(XMLInputFormat.START_TAG_KEY, "<page>")
